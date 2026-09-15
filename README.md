@@ -6,6 +6,7 @@ Agentverse is a generic, domain-independent multi-agent artificial intelligence 
 
 ## Table of Contents
 
+- [Sprint-Wise Implementation Plan (4 Developers)](docs/sprint_plan.md)
 - [Project Scope](#project-scope)
 - [System Architecture](#system-architecture)
 - [Workflow Diagrams](#workflow-diagrams)

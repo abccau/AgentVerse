@@ -4,6 +4,8 @@
 
 Agentverse (Multi-Agent Artificial Intelligence System) is a generic, domain-independent multi-agent platform designed to dynamically orchestrate specialized agents, RAG, memory, and tools to solve diverse user tasks. This document combines the system architecture with a phased rollout plan.
 
+> **Team Execution Plan**: For the detailed 4-developer sprint breakdown, file assignments, and logic specifications, see the [Sprint-Wise Implementation Plan (4 Developers)](file:///d:/AgentVerse/docs/sprint_plan.md).
+
 ---
 
 ## 1. Architecture & Workflow
