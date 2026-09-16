@@ -50,41 +50,41 @@ The following flowchart illustrates how requests enter the system, how the super
 ```mermaid
 flowchart TD
     subgraph Client ["Client Interface"]
-        User(["👤 User"])
-        UI["🖥️ Frontend UI / Client"]
+        User["User"]
+        UI["Frontend UI / Client"]
     end
 
     subgraph Gateway ["API & Ingress"]
-        API["⚡ FastAPI Application Gateway (backend/main.py)"]
+        API["FastAPI Application Gateway"]
     end
 
     subgraph Memory_Layer ["State & Memory Layer"]
-        State["🧠 LangGraph Shared State (memory/state.py)"]
-        History["💾 Conversation History & Checkpointer (memory/history.py)"]
+        State["LangGraph Shared State"]
+        History["Conversation History & Checkpointer"]
     end
 
     subgraph Core_Control ["Supervisory Control Node"]
-        Orchestrator["🎯 Orchestrator Agent\n(Supervisor & Graph Manager)"]
-        Planner["📋 Planner Agent\n(Task Decomposition & Routing)"]
+        Orchestrator["Orchestrator Agent"]
+        Planner["Planner Agent"]
     end
 
     subgraph Agent_Pool ["Specialized Agent Layer"]
         direction TB
-        Research["🔍 Research Agent\n(Web & Fact Gathering)"]
-        DocAgent["📄 Document Analysis Agent\n(PDF/DOCX Extraction & Summarization)"]
-        DataAgent["📊 Data Analysis Agent\n(Tabular Processing & Statistics)"]
-        CodeAgent["💻 Code Agent\n(Code Synthesis & Debugging)"]
-        RAGAgent["📚 Knowledge Management Agent\n(Enterprise Semantic Search)"]
+        Research["Research Agent"]
+        DocAgent["Document Analysis Agent"]
+        DataAgent["Data Analysis Agent"]
+        CodeAgent["Code Agent"]
+        RAGAgent["Knowledge Management Agent"]
     end
 
     subgraph External_Resources ["Tools & Knowledge Store"]
-        Tools["🛠️ Tool Suite\n(Web Search, Code Sandbox, Parsers)"]
-        Qdrant[("📦 Qdrant Vector DB\n(Docker / Embeddings)")]
+        Tools["Tool Suite"]
+        Qdrant[("Qdrant Vector DB")]
     end
 
     subgraph Quality_Control ["Evaluation & Synthesis"]
-        Evaluator{"⚖️ Evaluator Agent\n(Quality, Hallucination & Consistency Check)"}
-        Generator["📝 Response Generator\n(Aggregation & Markdown Formatting)"]
+        Evaluator{"Evaluator Agent"}
+        Generator["Response Generator"]
     end
 
     User -->|Submit Task| UI
@@ -113,8 +113,8 @@ flowchart TD
     CodeAgent -->|Return Artifacts| Evaluator
     RAGAgent -->|Return Artifacts| Evaluator
 
-    Evaluator -->|❌ Fail: Low Quality / Missing Info| Orchestrator
-    Evaluator -->|✅ Pass: Verification Met| Generator
+    Evaluator -->|Fail: Low Quality / Missing Info| Orchestrator
+    Evaluator -->|Pass: Verification Met| Generator
 
     Generator -->|Synthesized Response| API
     API -->|Stream Final Response| UI
@@ -141,7 +141,7 @@ sequenceDiagram
     User->>API: POST /api/tasks (Query + Attachments)
     API->>Orch: Initialize LangGraph State & Checkpoint
     Orch->>Plan: Invoke Plan Generation (Query + Memory)
-    Note over Plan: Analyzes query complexity,<br/>builds subtask DAG & selects agents
+    Note over Plan: Analyzes query complexity, builds subtask DAG & selects agents
     Plan-->>Orch: Structured Execution Plan (JSON DAG)
 
     loop Execute Subtasks (Sequential or Parallel)
@@ -151,7 +151,7 @@ sequenceDiagram
     end
 
     Orch->>Eval: Forward Aggregated Agent Outputs
-    Note over Eval: Verifies against original prompt,<br/>detects contradictions, calculates score
+    Note over Eval: Verifies against original prompt, detects contradictions, calculates score
 
     alt Evaluation Check Fails (Score < Threshold)
         Eval-->>Orch: Rejection Report + Specific Feedback
