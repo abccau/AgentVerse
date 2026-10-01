@@ -21,8 +21,9 @@ class LocalOllamaClient:
         if system:
             payload["system"] = system
 
+        timeout = httpx.Timeout(25.0, connect=3.0)
         try:
-            with httpx.Client(timeout=35.0) as client:
+            with httpx.Client(timeout=timeout) as client:
                 resp = client.post(f"{self.base_url}/api/generate", json=payload)
                 if resp.status_code == 200:
                     return resp.json().get("response", "").strip()
@@ -42,8 +43,9 @@ class LocalOllamaClient:
         if system:
             payload["system"] = system
 
+        timeout = httpx.Timeout(25.0, connect=3.0)
         try:
-            async with httpx.AsyncClient(timeout=35.0) as client:
+            async with httpx.AsyncClient(timeout=timeout) as client:
                 resp = await client.post(f"{self.base_url}/api/generate", json=payload)
                 if resp.status_code == 200:
                     return resp.json().get("response", "").strip()

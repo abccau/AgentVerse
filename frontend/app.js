@@ -132,6 +132,18 @@ document.getElementById('query-form').addEventListener('submit', async (e) => {
       body: JSON.stringify({ query })
     });
 
+    if (!res.ok) {
+      let errorMsg = `Server error (${res.status})`;
+      try {
+        const errJson = await res.json();
+        errorMsg = errJson.detail || errJson.message || errorMsg;
+      } catch {
+        const errText = await res.text();
+        if (errText) errorMsg = `${errorMsg}: ${errText}`;
+      }
+      throw new Error(errorMsg);
+    }
+
     const data = await res.json();
     if (canvasTitle) canvasTitle.textContent = 'Cluster Execution Complete';
     if (canvasSub) canvasSub.textContent = `Completed across ${data.dispatched_nodes.length} cluster nodes`;

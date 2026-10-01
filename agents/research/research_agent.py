@@ -22,11 +22,18 @@ class ResearchAgent:
             url = item.get("url")
             if url:
                 read_res = self.reader_tool.read_url(url)
-                if read_res["status"] == "success":
-                    sources_read.append(read_res["content"][:300])
+                if read_res.get("status") == "success" and read_res.get("content"):
+                    sources_read.append(read_res["content"][:400])
                     citations.append(url)
 
-        summary = f"Synthesized findings for '{query}' based on {len(citations)} verified online sources."
+        if sources_read:
+            findings_text = " ".join(sources_read)
+        elif search_results:
+            findings_text = " ".join([s.get("snippet", "") for s in search_results if s.get("snippet")])
+        else:
+            findings_text = f"Context gathered for '{query}'."
+
+        summary = findings_text if len(findings_text) > 20 else f"Synthesized findings for '{query}' from {len(citations)} sources."
 
         return {
             "agent": "ResearchAgent",
@@ -34,6 +41,7 @@ class ResearchAgent:
             "status": "COMPLETED",
             "query": query,
             "brief": summary,
+            "findings": findings_text,
             "citations": citations,
             "search_snippets": [s["snippet"] for s in search_results]
         }
