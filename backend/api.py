@@ -38,6 +38,14 @@ async def execute_query(req: QueryRequest, request: Request):
     session_id = req.session_id or str(uuid.uuid4())
     client_ip = request.client.host if request.client else "unknown"
 
+    print("\n" + "=" * 65)
+    print(f"📥 [CLUSTER LOG] INCOMING QUERY FROM: {client_ip}")
+    if "192.168.1.30" in client_ip or "192.168.1.13" in client_ip:
+        print(f"📍 SENDER IDENTIFIED: Laptop D (Control Node)")
+    print(f"💬 QUERY TEXT: '{req.query}'")
+    print(f"🔑 SESSION ID: {session_id}")
+    print("=" * 65)
+
     from agents.planner.planner import PlannerAgent
     from backend.ollama_client import ollama_client
     from agents.research.research_agent import ResearchAgent
@@ -47,6 +55,7 @@ async def execute_query(req: QueryRequest, request: Request):
 
     planner = PlannerAgent()
     plan = planner.plan_query(req.query)
+    print(f"⚡ [PLANNER LOG] Generated {len(plan)} subtasks across cluster.")
 
     # 1. Prompt local Ollama (qwen2.5:1.5b) for planning coordination
     prompt = f"Analyze the following user query for multi-agent delegation: '{req.query}'. Provide a brief 2-sentence executive summary of how the tasks should be coordinated across the cluster."
@@ -89,7 +98,12 @@ async def execute_query(req: QueryRequest, request: Request):
             }
 
     # 3. Local Ollama final synthesis of all node outputs
-    synthesis_prompt = f"User Query: '{req.query}'. Node results: {results}. Provide a complete answer combining these agent insights:"
+    synthesis_prompt = (
+        f"You are the Lead Synthesizer for the AgentVerse cluster. "
+        f"The user asked: '{req.query}'.\n"
+        f"The cluster agents gathered these results: {results}.\n"
+        f"Now, answer the user's question directly, clearly, and thoroughly in 1-2 paragraphs based on the gathered findings:"
+    )
     final_answer = await ollama_client.agenerate(synthesis_prompt)
 
     dispatched = [p["assigned_pc"] for p in plan]

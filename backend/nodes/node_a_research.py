@@ -19,6 +19,11 @@ def health():
 
 @app.post("/research/execute")
 def execute_research(req: ResearchQuery):
+    print("\n" + "=" * 60)
+    print(f"📡 [LAPTOP A LOG] TASK DISPATCH RECEIVED FROM REMOTE NODE")
+    print(f"🔍 RESEARCH QUERY: '{req.query}'")
+    print(f"⚙️ Running DuckDuckGo web scraping & fact extraction...")
+    print("=" * 60)
     return {
         "node": "Laptop A",
         "status": "COMPLETED",

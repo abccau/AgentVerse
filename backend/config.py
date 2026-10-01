@@ -8,14 +8,14 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
 
     # Gateway / Node definition
-    NODE_ID: str = "laptop_d"
-    NODE_NAME: str = "Control & Orchestration Gateway"
+    NODE_ID: str = "laptop_a"
+    NODE_NAME: str = "Research & Web Intelligence Node (Laptop A)"
     
     # 4-PC Cluster Registry Endpoints (Default LAN IPs, customizable via env)
-    NODE_A_URL: str = "http://192.168.1.10:8000"  # Laptop A - Research Node
+    NODE_A_URL: str = "http://10.111.219.14:8000"  # Laptop A (Your Machine Wi-Fi)
     NODE_B_URL: str = "http://192.168.1.11:8000"  # Laptop B - Document Node
     NODE_C_URL: str = "http://192.168.1.12:8000"  # Laptop C - Analytics & Code Node
-    NODE_D_URL: str = "http://192.168.1.13:8000"  # Laptop D - Control Node (Self)
+    NODE_D_URL: str = "http://192.168.1.30:8000"  # Laptop D - Control Node
 
     # Local emulation flag for testing 4 nodes on 1 machine if needed
     EMULATION_MODE: bool = False

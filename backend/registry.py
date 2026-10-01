@@ -68,8 +68,8 @@ class ClusterRegistry:
 
     async def ping_node(self, client: httpx.AsyncClient, node_key: str, node_info: Dict[str, Any]) -> Dict[str, Any]:
         """Pings a node's health endpoint to check connection and response latency."""
-        # If this is Laptop D (Self control node running this process), it is always ONLINE
-        if node_key == "laptop_d":
+        # If this is the active node running this process, it is always ONLINE
+        if node_key == settings.NODE_ID:
             return {
                 "id": node_key,
                 "name": node_info["name"],
