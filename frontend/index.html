@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentVerse • Distributed Multi-Agent Cluster</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-layout">
+    <!-- Top Navigation Bar -->
+    <header class="app-navbar">
+      <div class="brand-container">
+        <div class="brand-logo">
+          <div class="logo-core"></div>
+          <div class="logo-orbit"></div>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-wrap">
+            <span class="brand-title">AgentVerse</span>
+            <span class="version-badge">v0.4.0 •Live</span>
+          </div>
+          <p class="brand-desc">Distributed Multi-Agent Architecture • 4-Node Physical Cluster</p>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <div class="cluster-summary-badge" id="cluster-summary-pill">
+          <span class="live-dot pulse"></span>
+          <span id="cluster-summary-text">Checking Cluster...</span>
+        </div>
+        <div class="system-badge" id="my-ip-badge">
+          <span class="icon">🖥️</span>
+          <span id="my-ip-text">Connecting...</span>
+        </div>
+        <button id="refresh-cluster-btn" class="btn-refresh" title="Query node heartbeats">
+          <svg class="refresh-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Sync Topology
+        </button>
+      </div>
+    </header>
+
+    <!-- Cluster Topology Section -->
+    <section class="topology-section">
+      <div class="section-header">
+        <div class="header-left">
+          <h2 class="section-title">Physical Cluster Node Topology</h2>
+          <span class="section-subtitle">Real-time LAN heartbeat & hardware roles</span>
+        </div>
+        <div class="cluster-specs">
+          <span class="spec-tag">LAN Gateway: 0.0.0.0:8000</span>
+          <span class="spec-tag">Engine: Ollama Local (11434)</span>
+        </div>
+      </div>
+
+      <div class="cluster-grid" id="cluster-grid">
+        <!-- Rendered dynamically with sleek glassmorphism cards -->
+      </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <main class="workspace-panel">
+      <!-- Query Prompt Box -->
+      <section class="prompt-card">
+        <div class="prompt-header">
+          <div class="prompt-title-group">
+            <div class="spark-icon">⚡</div>
+            <div>
+              <h3>Execute Distributed Agent Workflow</h3>
+              <p>Prompts are decomposed into an asynchronous DAG and delegated across the physical cluster.</p>
+            </div>
+          </div>
+          <div class="preset-pills">
+            <span class="preset-label">Sample Prompts:</span>
+            <button type="button" class="preset-btn" data-query="Analyze quarterly sales data, search for competitor trends in 2025, and write a Python forecasting script.">Full 4-Node Multi-Agent Demo</button>
+            <button type="button" class="preset-btn" data-query="Search web for latest DeepSeek V3 benchmark results and summarize key architectural findings.">Research (Node A)</button>
+            <button type="button" class="preset-btn" data-query="Calculate revenue statistics on dataset and generate tested Python forecast code.">Analytics & Code (Node C)</button>
+          </div>
+        </div>
+
+        <form id="query-form" class="prompt-form">
+          <div class="textarea-wrapper">
+            <textarea id="query-input" placeholder="Type a prompt to orchestrate across cluster PCs..." rows="3" required></textarea>
+            <div class="input-actions">
+              <button type="submit" id="submit-btn" class="btn-execute">
+                <span class="btn-text">Execute on Cluster</span>
+                <span class="btn-icon">🚀</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Real-time Cluster Dispatch & Results Canvas -->
+      <section class="results-canvas" id="results-section" style="display: none;">
+        <div class="canvas-header">
+          <div class="canvas-title-group">
+            <div class="canvas-icon">📊</div>
+            <div>
+              <h3 id="canvas-status-title">Cluster Execution Pipeline</h3>
+              <p id="canvas-status-subtitle">Orchestrating tasks across nodes...</p>
+            </div>
+          </div>
+          <div id="execution-meta-badge" class="meta-badge">Session: Active</div>
+        </div>
+
+        <!-- Task DAG Visualizer -->
+        <div class="pipeline-section">
+          <div class="pipeline-title">Task Decomposition & Node Mapping (DAG)</div>
+          <div class="dispatch-map" id="dispatch-map">
+            <!-- Dynamic task badges -->
+          </div>
+        </div>
+
+        <!-- Dynamic Output Container -->
+        <div class="response-card" id="response-card">
+          <!-- Populated with rich card components -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Node Inspection Modal -->
+    <div id="node-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-window">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-node-icon" id="modal-icon">🖥️</div>
+            <div>
+              <h3 id="modal-title">Node Diagnostics</h3>
+              <p id="modal-subtitle">Inspecting physical cluster hardware node</p>
+            </div>
+          </div>
+          <button id="modal-close" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
