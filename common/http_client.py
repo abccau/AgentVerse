@@ -2,10 +2,12 @@ import httpx
 from typing import Dict, Any
 from .schemas import QueryResponse
 
-async def call_agent(url: str, payload: dict, timeout: int = 120) -> QueryResponse:
+async def call_agent(url: Any, payload: dict, timeout: int = 120) -> QueryResponse:
+    if isinstance(url, list):
+        url = url[0] if url else ""
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.post(url, json=payload)
+            resp = await client.post(str(url), json=payload)
             resp.raise_for_status()
             return QueryResponse(**resp.json())
     except httpx.TimeoutException:

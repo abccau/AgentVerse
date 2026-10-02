@@ -142,7 +142,8 @@ async def execute_query(payload: QueryPayload):
         else:
             raise HTTPException(status_code=503, detail=f"No node registered for agent '{target_agent}'. Active agents: {list(registry.keys())}")
             
-    agent_url = registry[target_agent]
+    raw_url = registry[target_agent]
+    agent_url = raw_url[0] if isinstance(raw_url, list) else raw_url
     req_id = str(uuid.uuid4())
     
     request_data = {
@@ -157,6 +158,8 @@ async def execute_query(payload: QueryPayload):
         raise HTTPException(status_code=502, detail=f"Failed communicating with {target_agent} at {agent_url}: {str(e)}")
         
     assigned_pc = "Laptop B (Brain Node)" if target_agent in ["orchestrator", "planner"] else "Laptop C (Workers Node)"
+    raw_planner = registry.get("planner", agent_url)
+    planner_url = raw_planner[0] if isinstance(raw_planner, list) else raw_planner
     
     cluster_plan = [
         {
@@ -164,7 +167,7 @@ async def execute_query(payload: QueryPayload):
             "agent": "Planner",
             "target_agent": "planner",
             "assigned_pc": "Laptop B (Brain - Port 8001)",
-            "node_url": registry.get("planner", agent_url),
+            "node_url": planner_url,
             "status": "COMPLETED"
         },
         {
