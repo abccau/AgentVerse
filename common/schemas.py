@@ -21,7 +21,7 @@ class PlanStep(BaseModel):
     id: str
     agent: Literal["research", "coding", "tools"]
     task: str
-    depends_on: List[str] = []
+    depends_on: List[str] = Field(default_factory=list)
 
 class Plan(BaseModel):
     complexity: Literal["simple", "complex"]

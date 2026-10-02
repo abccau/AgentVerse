@@ -12,6 +12,9 @@ laptops:
   brain:
     ip: "192.168.1.17"
     port: 8001
-  workers:
+  worker_1:
     ip: "192.168.1.15"
+    port: 8003
+  worker_2:
+    ip: "192.168.1.21"
     port: 8003
