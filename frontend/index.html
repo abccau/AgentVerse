@@ -1,151 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentVerse • Distributed Multi-Agent Cluster</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
-
-  <div class="app-layout">
-    <!-- Top Navigation Bar -->
-    <header class="app-navbar">
-      <div class="brand-container">
-        <div class="brand-logo">
-          <div class="logo-core"></div>
-          <div class="logo-orbit"></div>
-        </div>
-        <div class="brand-text">
-          <div class="brand-title-wrap">
-            <span class="brand-title">AgentVerse</span>
-            <span class="version-badge">v0.4.0 •Live</span>
-          </div>
-          <p class="brand-desc">Distributed Multi-Agent Architecture • 4-Node Physical Cluster</p>
-        </div>
-      </div>
-
-      <div class="nav-controls">
-        <div class="cluster-summary-badge" id="cluster-summary-pill">
-          <span class="live-dot pulse"></span>
-          <span id="cluster-summary-text">Checking Cluster...</span>
-        </div>
-        <div class="system-badge" id="my-ip-badge">
-          <span class="icon">🖥️</span>
-          <span id="my-ip-text">Connecting...</span>
-        </div>
-        <button id="refresh-cluster-btn" class="btn-refresh" title="Query node heartbeats">
-          <svg class="refresh-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Sync Topology
-        </button>
-      </div>
-    </header>
-
-    <!-- Cluster Topology Section -->
-    <section class="topology-section">
-      <div class="section-header">
-        <div class="header-left">
-          <h2 class="section-title">Physical Cluster Node Topology</h2>
-          <span class="section-subtitle">Real-time LAN heartbeat & hardware roles</span>
-        </div>
-        <div class="cluster-specs">
-          <span class="spec-tag">LAN Gateway: 0.0.0.0:8000</span>
-          <span class="spec-tag">Engine: Ollama Local (11434)</span>
-        </div>
-      </div>
-
-      <div class="cluster-grid" id="cluster-grid">
-        <!-- Rendered dynamically with sleek glassmorphism cards -->
-      </div>
-    </section>
-
-    <!-- Main Workspace -->
-    <main class="workspace-panel">
-      <!-- Query Prompt Box -->
-      <section class="prompt-card">
-        <div class="prompt-header">
-          <div class="prompt-title-group">
-            <div class="spark-icon">⚡</div>
-            <div>
-              <h3>Execute Distributed Agent Workflow</h3>
-              <p>Prompts are decomposed into an asynchronous DAG and delegated across the physical cluster.</p>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <div class="orbit"></div>
+                    </div>
+                    <span>AgentVerse</span>
+                </div>
             </div>
-          </div>
-          <div class="preset-pills">
-            <span class="preset-label">Sample Prompts:</span>
-            <button type="button" class="preset-btn" data-query="Analyze quarterly sales data, search for competitor trends in 2025, and write a Python forecasting script.">Full 4-Node Multi-Agent Demo</button>
-            <button type="button" class="preset-btn" data-query="Search web for latest DeepSeek V3 benchmark results and summarize key architectural findings.">Research (Node A)</button>
-            <button type="button" class="preset-btn" data-query="Calculate revenue statistics on dataset and generate tested Python forecast code.">Analytics & Code (Node C)</button>
-          </div>
-        </div>
-
-        <form id="query-form" class="prompt-form">
-          <div class="textarea-wrapper">
-            <textarea id="query-input" placeholder="Type a prompt to orchestrate across cluster PCs..." rows="3" required></textarea>
-            <div class="input-actions">
-              <button type="submit" id="submit-btn" class="btn-execute">
-                <span class="btn-text">Execute on Cluster</span>
-                <span class="btn-icon">🚀</span>
-              </button>
+            
+            <div class="sidebar-action">
+                <button class="new-chat-btn" id="new-chat-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    New Chat
+                </button>
             </div>
-          </div>
-        </form>
-      </section>
 
-      <!-- Real-time Cluster Dispatch & Results Canvas -->
-      <section class="results-canvas" id="results-section" style="display: none;">
-        <div class="canvas-header">
-          <div class="canvas-title-group">
-            <div class="canvas-icon">📊</div>
-            <div>
-              <h3 id="canvas-status-title">Cluster Execution Pipeline</h3>
-              <p id="canvas-status-subtitle">Orchestrating tasks across nodes...</p>
+            <div class="sidebar-section">
+                <span class="section-title">Chats</span>
+                <ul class="nav-list" id="chat-history">
+                    <li class="nav-item active">Analyze dataset</li>
+                    <li class="nav-item">PDF Analysis</li>
+                </ul>
             </div>
-          </div>
-          <div id="execution-meta-badge" class="meta-badge">Session: Active</div>
-        </div>
 
-        <!-- Task DAG Visualizer -->
-        <div class="pipeline-section">
-          <div class="pipeline-title">Task Decomposition & Node Mapping (DAG)</div>
-          <div class="dispatch-map" id="dispatch-map">
-            <!-- Dynamic task badges -->
-          </div>
-        </div>
+            <div class="sidebar-divider"></div>
 
-        <!-- Dynamic Output Container -->
-        <div class="response-card" id="response-card">
-          <!-- Populated with rich card components -->
-        </div>
-      </section>
-    </main>
-
-    <!-- Node Inspection Modal -->
-    <div id="node-modal" class="modal-backdrop" style="display: none;">
-      <div class="modal-window">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <div class="modal-node-icon" id="modal-icon">🖥️</div>
-            <div>
-              <h3 id="modal-title">Node Diagnostics</h3>
-              <p id="modal-subtitle">Inspecting physical cluster hardware node</p>
+            <div class="sidebar-section">
+                <ul class="nav-list">
+                    <li class="nav-item" id="nav-cluster">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                        Cluster
+                    </li>
+                    <li class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        Knowledge
+                    </li>
+                    <li class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Runs
+                    </li>
+                </ul>
             </div>
-          </div>
-          <button id="modal-close" class="modal-close-btn" aria-label="Close modal">&times;</button>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <header class="topbar">
+                <div class="topbar-title">Analyze dataset</div>
+                <div class="cluster-status" id="header-cluster-status">
+                    <div class="status-dot online"></div>
+                    <span id="cluster-count">4 PCs connected</span>
+                </div>
+            </header>
+
+            <div class="chat-container" id="chat-container">
+                <!-- Welcome State -->
+                <div class="hero-state" id="hero-state">
+                    <h1>AgentVerse</h1>
+                    <p class="subtitle">Your distributed AI workspace</p>
+                    <div class="capabilities">
+                        <span>Research</span> • <span>Analyze</span> • <span>Code</span> • <span>Understand</span>
+                    </div>
+                </div>
+                
+                <div class="messages" id="messages-view" style="display: none;"></div>
+            </div>
+
+            <!-- Composer Area -->
+            <div class="composer-container">
+                <div class="composer">
+                    <div class="composer-input-wrapper">
+                        <textarea id="prompt-input" placeholder="Ask AgentVerse anything..." rows="1"></textarea>
+                    </div>
+                    <div class="composer-toolbar">
+                        <div class="toolbar-left">
+                            <button class="icon-btn tooltip" data-tooltip="Attach file">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                            </button>
+                            <div class="agent-mode-selector" id="agent-mode-btn">
+                                <div class="status-dot auto"></div>
+                                AgentVerse Auto
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <button class="send-btn" id="send-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="composer-footer">
+                    Research &nbsp; Analyze &nbsp; Code &nbsp; Documents
+                </div>
+            </div>
+        </main>
+        
+        <!-- Execution Drawer (Hidden by default) -->
+        <div class="execution-drawer" id="execution-drawer">
+            <div class="drawer-header">
+                <h3>Execution</h3>
+                <button class="icon-btn" id="close-drawer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="drawer-content">
+                <div class="execution-graph" id="execution-graph-content">
+                    <!-- Workflow animated here -->
+                </div>
+            </div>
         </div>
-        <div class="modal-body" id="modal-body">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script src="/static/app.js"></script>
+    <!-- Agent Selection Modal -->
+    <div class="modal-overlay" id="agent-modal">
+        <div class="modal">
+            <h3>Select execution mode</h3>
+            <div class="agent-options">
+                <div class="agent-option selected" data-agent="Auto">
+                    <div class="agent-option-header">
+                        <div class="status-dot auto"></div>
+                        <strong>Auto</strong>
+                    </div>
+                    <p>Let AgentVerse decide</p>
+                </div>
+                <div class="agent-option" data-agent="Research">
+                    <div class="agent-option-header">
+                        <div class="status-dot idle"></div>
+                        <strong>Research</strong>
+                    </div>
+                    <p>Web research & fact gathering</p>
+                </div>
+                <div class="agent-option" data-agent="Code">
+                    <div class="agent-option-header">
+                        <div class="status-dot idle"></div>
+                        <strong>Code</strong>
+                    </div>
+                    <p>Coding & debugging</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cluster Modal -->
+    <div class="modal-overlay" id="cluster-modal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>AgentVerse Cluster</h3>
+                <button class="icon-btn close-modal">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="cluster-topology" id="cluster-topology">
+                <!-- Topology injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/anime.min.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
