@@ -1,0 +1,17 @@
+network:
+  wifi_name: "REPLACE_WITH_SSID"
+  internet_access: false
+  default_node_port: 8000
+  request_timeout_s: 120
+  health_timeout_s: 3
+
+laptops:
+  controller:
+    ip: "127.0.0.1"
+    ui_port: 8501
+  brain:
+    ip: "127.0.0.1"
+    port: 8001
+  workers:
+    ip: "127.0.0.1"
+    port: 8003

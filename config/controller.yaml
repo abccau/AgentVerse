@@ -1,0 +1,15 @@
+laptop: controller
+
+ui:
+  title: "Multi-Agent AI Platform"
+
+routing:
+  default_target: "orchestrator"
+  mode_map:
+    Code: "coding"
+    Research: "research"
+  rules:
+    - name: clear_code_request
+      when: regex
+      pattern: '\b(python|java|javascript|sql|function|bug|debug|stack ?trace|compile|script)\b'
+      target: "coding"
