@@ -1,0 +1,12 @@
+laptop: brain
+bind_host: "0.0.0.0"
+
+agents:
+  - name: orchestrator
+    expose: true
+    handler: "nodes.orchestrator.orchestrator:handle"
+    model: "qwen3:8b"
+  - name: planner
+    expose: true
+    handler: "nodes.orchestrator.planner:handle"
+    model: "qwen3:8b"
