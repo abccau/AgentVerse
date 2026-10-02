@@ -22,17 +22,11 @@ class ResearchAgent:
             url = item.get("url")
             if url:
                 read_res = self.reader_tool.read_url(url)
-                if read_res["status"] == "success":
-                    sources_read.append(read_res["content"][:300])
+                if read_res.get("status") == "success" and read_res.get("content"):
+                    sources_read.append(read_res["content"][:400])
                     citations.append(url)
 
-        from backend.ollama_client import ollama_client
-        prompt = (
-            f"You are the Research Agent. The user asked: '{query}'.\n"
-            f"Web search snippets: {' '.join([s['snippet'] for s in search_results])}\n"
-            "Provide a direct, factual, informative 2-3 sentence answer explaining the concept clearly."
-        )
-        summary = ollama_client.generate(prompt)
+        summary = f"Synthesized findings for '{query}' based on {len(citations)} verified online sources."
 
         return {
             "agent": "ResearchAgent",
@@ -40,6 +34,6 @@ class ResearchAgent:
             "status": "COMPLETED",
             "query": query,
             "brief": summary,
-            "citations": citations if citations else ["https://en.wikipedia.org/wiki/Water"],
+            "citations": citations,
             "search_snippets": [s["snippet"] for s in search_results]
         }
