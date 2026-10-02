@@ -328,22 +328,6 @@ function scrollChatToBottom() {
   }
 }
 
-function formatMarkdown(text) {
-  if (!text) return '';
-  let md = text
-    .replace(/^### (.*$)/gim, '<h4 style="font-size: 0.95rem; font-weight: 700; margin: 8px 0 4px;">$1</h4>')
-    .replace(/^## (.*$)/gim, '<h3 style="font-size: 1rem; font-weight: 700; margin: 10px 0 6px;">$1</h3>')
-    .replace(/^# (.*$)/gim, '<h2 style="font-size: 1.1rem; font-weight: 700; margin: 12px 0 6px;">$1</h2>')
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/```([\s\S]*?)```/gim, '<pre class="code-pre-box"><code>$1</code></pre>')
-    .replace(/`([^`]+)`/gim, '<code>$1</code>')
-    .replace(/\n\n/gim, '</p><p>')
-    .replace(/\n/gim, '<br>');
-
-  return `<p>${md}</p>`;
-}
-
 function escapeHTML(str) {
   if (!str) return '';
   return String(str)
@@ -352,6 +336,73 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function copyCodeSnippet(btn) {
+  try {
+    const box = btn.closest('.code-pre-box');
+    if (!box) return;
+    const codeEl = box.querySelector('code');
+    if (!codeEl) return;
+    const code = codeEl.innerText || codeEl.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const span = btn.querySelector('span');
+      if (span) {
+        const prev = span.textContent;
+        span.textContent = 'Copied!';
+        setTimeout(() => { span.textContent = prev; }, 1800);
+      }
+    });
+  } catch (err) {
+    console.error('Copy failed:', err);
+  }
+}
+window.copyCodeSnippet = copyCodeSnippet;
+
+function formatMarkdown(text) {
+  if (!text) return '';
+
+  const codeBlocks = [];
+
+  // 1. Isolate and parse fenced code blocks (preserve exact indentation & newlines)
+  let md = text.replace(/```([a-zA-Z0-9_\-\+\.]*)\r?\n?([\s\S]*?)```/g, (match, lang, code) => {
+    const cleanLang = (lang || 'code').trim().toLowerCase();
+    const cleanCode = escapeHTML(code.replace(/^\r?\n+|\r?\n+$/g, ''));
+    const placeholder = `__AV_CODE_BLOCK_${codeBlocks.length}__`;
+
+    const html = `
+<div class="code-pre-box">
+  <div class="code-box-header">
+    <span class="code-box-lang">${cleanLang}</span>
+    <button type="button" class="code-copy-btn" onclick="copyCodeSnippet(this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      <span>Copy</span>
+    </button>
+  </div>
+  <pre class="code-box-pre"><code class="language-${cleanLang}">${cleanCode}</code></pre>
+</div>`;
+
+    codeBlocks.push(html);
+    return placeholder;
+  });
+
+  // 2. Format standard Markdown headings & typography
+  md = md
+    .replace(/^### (.*$)/gim, '<h4 style="font-size: 0.95rem; font-weight: 700; margin: 8px 0 4px;">$1</h4>')
+    .replace(/^## (.*$)/gim, '<h3 style="font-size: 1rem; font-weight: 700; margin: 10px 0 6px;">$1</h3>')
+    .replace(/^# (.*$)/gim, '<h2 style="font-size: 1.1rem; font-weight: 700; margin: 12px 0 6px;">$1</h2>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    .replace(/`([^`]+)`/gim, '<code class="inline-code">$1</code>')
+    .replace(/\r?\n\r?\n/gim, '</p><p>')
+    .replace(/\r?\n/gim, '<br>');
+
+  // 3. Re-insert preserved code blocks without corrupted linebreaks
+  codeBlocks.forEach((block, idx) => {
+    md = md.replace(`__AV_CODE_BLOCK_${idx}__`, block);
+  });
+
+  return `<p>${md}</p>`;
 }
 
 // ==========================================================================
