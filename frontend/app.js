@@ -209,6 +209,23 @@ function addAssistantResponse(answerText, executionDetails = null, sources = nul
   // Progressive Disclosure: "✦ How AgentVerse Worked" (PRD Section 11 & 51)
   let howItWorkedHtml = '';
   if (executionDetails) {
+    const runId = executionDetails.session_id ? executionDetails.session_id.substring(0, 8).toUpperCase() : 'AV-1042';
+    const planSteps = executionDetails.cluster_plan || [
+      { agent: 'Planner', assigned_pc: 'Laptop B (Brain - 8001)', status: 'COMPLETED' },
+      { agent: 'Specialized Agent', assigned_pc: 'Laptop C (Workers - 8003)', status: 'COMPLETED' },
+      { agent: 'Evaluator', assigned_pc: 'Laptop D (Controller - 3000)', status: 'COMPLETED' }
+    ];
+
+    const stepRows = planSteps.map((step) => `
+      <div class="agent-step-row">
+        <div class="agent-step-info">
+          <span class="agent-check">✓</span>
+          <span><strong>${escapeHTML(step.agent || step.target_agent)}:</strong> Dispatched & executed across cluster</span>
+        </div>
+        <span class="agent-pc-label">${escapeHTML(step.assigned_pc || 'Cluster Node')}</span>
+      </div>
+    `).join('');
+
     howItWorkedHtml = `
       <div class="how-it-worked-toggle">
         <button type="button" class="btn-how-it-worked" onclick="toggleHowItWorked(this)">
@@ -216,28 +233,8 @@ function addAssistantResponse(answerText, executionDetails = null, sources = nul
           <span class="chevron">›</span>
         </button>
         <div class="how-it-worked-body" style="display: none;">
-          <div class="agent-step-row">
-            <div class="agent-step-info">
-              <span class="agent-check">✓</span>
-              <span><strong>Planner:</strong> Decomposed workflow into parallel DAG</span>
-            </div>
-            <span class="agent-pc-label">Laptop D (Master)</span>
-          </div>
-          <div class="agent-step-row">
-            <div class="agent-step-info">
-              <span class="agent-check">✓</span>
-              <span><strong>Specialized Agents:</strong> Executed across LAN nodes</span>
-            </div>
-            <span class="agent-pc-label">Laptop A & C</span>
-          </div>
-          <div class="agent-step-row">
-            <div class="agent-step-info">
-              <span class="agent-check">✓</span>
-              <span><strong>Evaluator:</strong> Verified output integrity & consistency</span>
-            </div>
-            <span class="agent-pc-label">Laptop D</span>
-          </div>
-          <button type="button" class="btn-open-drawer-inline" onclick="openExecutionDrawerForRun('AV-1042')">
+          ${stepRows}
+          <button type="button" class="btn-open-drawer-inline" onclick="openExecutionDrawerForRun('${runId}')">
             View Full Execution Graph ↗
           </button>
         </div>
@@ -385,7 +382,7 @@ async function executeUserQuery(promptText) {
     const res = await fetch('/api/v1/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: promptText })
+      body: JSON.stringify({ query: promptText, mode: state.activeAgentMode })
     });
 
     if (!res.ok) {
@@ -441,6 +438,40 @@ function toggleExecutionDrawer(open = null) {
 window.openExecutionDrawerForRun = function(runId) {
   const runSub = document.getElementById('drawer-run-id');
   if (runSub) runSub.textContent = `Run #${runId} • Physical PC Assignment`;
+
+  if (state.activeRunData && state.activeRunData.cluster_plan) {
+    // Populate simple steps
+    const stepsContainer = document.getElementById('tab-content-simple');
+    if (stepsContainer) {
+      let html = '';
+      state.activeRunData.cluster_plan.forEach((step, idx) => {
+        if (idx > 0) html += '<div class="exec-connector-line"></div>';
+        html += `
+          <div class="exec-step-card">
+            <div class="exec-step-num">${idx + 1}</div>
+            <div class="exec-step-details">
+              <div class="step-role-title">${escapeHTML(step.agent || step.target_agent)}</div>
+              <div class="step-agent-desc">${escapeHTML(step.node_url || 'Distributed LAN Microservice')}</div>
+              <div class="step-pc-tag">📍 Executed on <strong>${escapeHTML(step.assigned_pc || 'Cluster Node')}</strong></div>
+            </div>
+            <span class="step-status-tag done">✓ Completed</span>
+          </div>
+        `;
+      });
+      stepsContainer.innerHTML = html;
+    }
+
+    // Populate DAG raw viewer
+    const dagEl = document.getElementById('dag-raw-json');
+    if (dagEl) {
+      let yamlText = `run_id: "${runId}"\nquery: "${state.activeRunData.query || ''}"\ntarget_agent: ${state.activeRunData.target_agent || 'orchestrator'}\nstatus: completed\n\ntasks:\n`;
+      state.activeRunData.cluster_plan.forEach((step, idx) => {
+        yamlText += `  task_${idx + 1}:\n    agent: ${step.target_agent || step.agent}\n    assigned_pc: "${step.assigned_pc}"\n    endpoint: "${step.node_url}"\n    status: ${step.status || 'completed'}\n`;
+      });
+      dagEl.textContent = yamlText;
+    }
+  }
+
   toggleExecutionDrawer(true);
 };
 
@@ -466,12 +497,22 @@ async function fetchClusterStatus() {
       if (sidebarText) sidebarText.textContent = `${online} PCs Online`;
       if (badge) badge.innerHTML = `<span class="dot-green">●</span> ${online} / ${total} Systems Operational`;
 
-      // Update node details in state if returned
+      // Update node details in state and in diagram boxes
       if (data.nodes) {
         for (const [key, node] of Object.entries(data.nodes)) {
           if (state.nodes[key]) {
             state.nodes[key].status = node.status || 'ONLINE';
             state.nodes[key].url = node.url || state.nodes[key].url;
+            state.nodes[key].latency = node.latency || state.nodes[key].latency;
+            state.nodes[key].name = node.name || state.nodes[key].name;
+            state.nodes[key].role = node.role || state.nodes[key].role;
+          }
+          const box = document.getElementById(`node-box-${key}`);
+          if (box) {
+            const footerLabel = box.querySelector('.node-status-label');
+            if (footerLabel) {
+              footerLabel.textContent = `● ${node.status === 'ONLINE' ? 'Online' : node.status} (${node.latency || '1ms'})`;
+            }
           }
         }
       }
