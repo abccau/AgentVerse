@@ -1,6 +1,7 @@
 import os
 import sys
 import uuid
+import random
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -29,16 +30,18 @@ async def serve_ui():
     with open(index_path, "r", encoding="utf-8") as f:
         return f.read()
 
-@app.get("/api/cluster/status")
+@app.get("/api/v1/cluster")
 async def get_cluster_status():
     registry = get_registry(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     # Return mock connected nodes based on registry
     nodes = {}
-    for agent, url in registry.items():
-        base = "/".join(url.split("/")[:-2])
-        if base not in nodes:
-            nodes[base] = {"url": base, "agents": []}
-        nodes[base]["agents"].append(agent)
+    for agent, urls in registry.items():
+        for url in urls:
+            base = "/".join(url.split("/")[:-2])
+            if base not in nodes:
+                nodes[base] = {"url": base, "agents": []}
+            if agent not in nodes[base]["agents"]:
+                nodes[base]["agents"].append(agent)
     
     return {
         "status": "ok",
@@ -46,20 +49,20 @@ async def get_cluster_status():
         "connected_count": len(nodes)
     }
 
-@app.post("/api/chat")
+@app.post("/api/v1/query")
 async def chat_endpoint(req: ChatRequest):
     registry = get_registry(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     target_agent = get_target_agent(req.query, req.mode)
     
-    if target_agent not in registry:
+    if target_agent not in registry or not registry[target_agent]:
         return {
             "status": "error",
             "node": "controller",
-            "answer": f"Target agent '{target_agent}' is not running.",
+            "final_synthesized_answer": f"Target agent '{target_agent}' is not running.",
             "execution_path": [{"agent": "controller", "status": "error"}]
         }
         
-    url = registry[target_agent]
+    url = random.choice(registry[target_agent])
     payload = {
         "request_id": str(uuid.uuid4()),
         "query": req.query,
@@ -78,7 +81,7 @@ async def chat_endpoint(req: ChatRequest):
     return {
         "status": response.status,
         "node": response.node,
-        "answer": response.answer,
+        "final_synthesized_answer": response.answer,
         "metadata": response.metadata,
         "execution_path": execution_path
     }

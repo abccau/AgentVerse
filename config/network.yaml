@@ -7,11 +7,14 @@ network:
 
 laptops:
   controller:
-    ip: "127.0.0.1"
+    ip: "192.168.1.20"
     ui_port: 8501
   brain:
-    ip: "127.0.0.1"
+    ip: "192.168.1.17"
     port: 8001
-  workers:
-    ip: "127.0.0.1"
+  worker_1:
+    ip: "192.168.1.15"
+    port: 8003
+  worker_2:
+    ip: "192.168.1.21"
     port: 8003
