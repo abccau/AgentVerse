@@ -148,7 +148,12 @@ async def execute_query(payload: QueryPayload):
         else:
             raise HTTPException(status_code=503, detail=f"No node registered for agent '{target_agent}'. Active agents: {list(registry.keys())}")
             
-    agent_url = registry[target_agent]
+    agent_urls = registry[target_agent]
+    agent_url = agent_urls[0] if isinstance(agent_urls, list) else agent_urls
+    
+    planner_urls = registry.get("planner", agent_url)
+    planner_url = planner_urls[0] if isinstance(planner_urls, list) else planner_urls
+    
     req_id = str(uuid.uuid4())
     
     request_data = {
@@ -175,9 +180,10 @@ async def execute_query(payload: QueryPayload):
             "agent": "Planner",
             "target_agent": "planner",
             "assigned_pc": "Laptop A (Brain - Port 8001)",
-            "node_url": registry.get("planner", agent_url),
+            "node_url": planner_url,
             "status": "COMPLETED"
         },
+
 
         {
             "step": 2,
