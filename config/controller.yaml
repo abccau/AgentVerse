@@ -8,8 +8,19 @@ routing:
   mode_map:
     Code: "coding"
     Research: "research"
+    Tools: "tools"
+    Auto: "orchestrator"
   rules:
     - name: clear_code_request
       when: regex
-      pattern: '\b(python|java|javascript|sql|function|bug|debug|stack ?trace|compile|script)\b'
+      pattern: '\b(python|java|javascript|sql|function|bug|debug|stack ?trace|compile|script|class|algorithm)\b'
       target: "coding"
+    - name: clear_tools_request
+      when: regex
+      pattern: '\b(websearch|search|duckduckgo|browse|google|calc|calculate|calculator)\b'
+      target: "tools"
+    - name: clear_research_request
+      when: regex
+      pattern: '\b(research|investigate|market|overview|history|explain|analyze)\b'
+      target: "research"
+

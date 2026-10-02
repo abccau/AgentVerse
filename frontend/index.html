@@ -3,149 +3,940 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentVerse • Distributed Multi-Agent Cluster</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="description" content="AgentVerse - Clean, Minimal AI Workspace with Distributed Multi-Agent Cluster Infrastructure">
+  <title>AgentVerse • Distributed AI Workspace</title>
+  
+  <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
+  <!-- Accessibility Live Region -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
+  <!-- Main App Shell -->
   <div class="app-layout">
-    <!-- Top Navigation Bar -->
-    <header class="app-navbar">
-      <div class="brand-container">
-        <div class="brand-logo">
-          <div class="logo-core"></div>
-          <div class="logo-orbit"></div>
-        </div>
-        <div class="brand-text">
-          <div class="brand-title-wrap">
-            <span class="brand-title">AgentVerse</span>
-            <span class="version-badge">v0.4.0 •Live</span>
+    
+    <!-- Left Navigation Sidebar (PRD Section 4 & 58) -->
+    <aside class="app-sidebar" id="app-sidebar" aria-label="Main Navigation">
+      <!-- Sidebar Brand -->
+      <div class="sidebar-header">
+        <a href="#" class="brand-link" id="brand-home-btn">
+          <div class="brand-symbol">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <circle cx="19" cy="5" r="2"></circle>
+              <circle cx="5" cy="19" r="2"></circle>
+              <circle cx="19" cy="19" r="2"></circle>
+              <line x1="12" y1="9" x2="19" y2="5"></line>
+              <line x1="9.5" y1="13.5" x2="5" y2="19"></line>
+              <line x1="14" y1="14" x2="19" y2="19"></line>
+            </svg>
           </div>
-          <p class="brand-desc">Distributed Multi-Agent Architecture • 4-Node Physical Cluster</p>
-        </div>
+          <div class="brand-info">
+            <span class="brand-title">AgentVerse</span>
+            <span class="brand-tagline">AI Workspace</span>
+          </div>
+        </a>
       </div>
 
-      <div class="nav-controls">
-        <div class="cluster-summary-badge" id="cluster-summary-pill">
-          <span class="live-dot pulse"></span>
-          <span id="cluster-summary-text">Checking Cluster...</span>
-        </div>
-        <div class="system-badge" id="my-ip-badge">
-          <span class="icon">🖥️</span>
-          <span id="my-ip-text">Connecting...</span>
-        </div>
-        <button id="refresh-cluster-btn" class="btn-refresh" title="Query node heartbeats">
-          <svg class="refresh-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Sync Topology
+      <!-- Action Button: New Chat -->
+      <div class="sidebar-action-wrap">
+        <button type="button" class="btn-new-chat" id="btn-new-chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Chat</span>
         </button>
       </div>
-    </header>
 
-    <!-- Cluster Topology Section -->
-    <section class="topology-section">
-      <div class="section-header">
-        <div class="header-left">
-          <h2 class="section-title">Physical Cluster Node Topology</h2>
-          <span class="section-subtitle">Real-time LAN heartbeat & hardware roles</span>
-        </div>
-        <div class="cluster-specs">
-          <span class="spec-tag">LAN Gateway: 0.0.0.0:8000</span>
-          <span class="spec-tag">Engine: Ollama Local (11434)</span>
+      <!-- Conversations History Section (PRD Section 47) -->
+      <div class="conversations-nav-wrap">
+        <div class="nav-section-title">Chats</div>
+        <div class="conversations-list" id="conversations-list" role="list">
+          <div class="history-group">
+            <span class="history-group-label">Today</span>
+            <button type="button" class="history-item active" data-chat-id="default">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span class="history-item-text">Analyze Q3 sales dataset</span>
+            </button>
+            <button type="button" class="history-item" data-chat-id="research-ai">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span class="history-item-text">Research DeepSeek V3 architecture</span>
+            </button>
+          </div>
+          <div class="history-group">
+            <span class="history-group-label">Previous 7 Days</span>
+            <button type="button" class="history-item" data-chat-id="python-pipeline">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span class="history-item-text">Build Python forecasting script</span>
+            </button>
+            <button type="button" class="history-item" data-chat-id="pdf-summary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span class="history-item-text">Qdrant vector documentation</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="cluster-grid" id="cluster-grid">
-        <!-- Rendered dynamically with sleek glassmorphism cards -->
-      </div>
-    </section>
+      <!-- App Views Navigation (PRD Section 4 & 58) -->
+      <nav class="sidebar-views-nav" aria-label="Views">
+        <div class="nav-section-title">Workspace</div>
+        <button type="button" class="view-nav-item active" data-view="chat" id="nav-item-chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Chat</span>
+        </button>
+        <button type="button" class="view-nav-item" data-view="cluster" id="nav-item-cluster">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <span>Cluster</span>
+          <span class="badge-count" id="sidebar-node-count">4</span>
+        </button>
+        <button type="button" class="view-nav-item" data-view="knowledge" id="nav-item-knowledge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>Knowledge</span>
+        </button>
+        <button type="button" class="view-nav-item" data-view="runs" id="nav-item-runs">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Runs</span>
+        </button>
+        <button type="button" class="view-nav-item" data-view="settings" id="nav-item-settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </nav>
 
-    <!-- Main Workspace -->
-    <main class="workspace-panel">
-      <!-- Query Prompt Box -->
-      <section class="prompt-card">
-        <div class="prompt-header">
-          <div class="prompt-title-group">
-            <div class="spark-icon">⚡</div>
-            <div>
-              <h3>Execute Distributed Agent Workflow</h3>
-              <p>Prompts are decomposed into an asynchronous DAG and delegated across the physical cluster.</p>
+      <!-- Sidebar Footer: Compact User/Cluster Status -->
+      <div class="sidebar-footer">
+        <div class="cluster-quick-indicator" id="sidebar-cluster-pill" title="Click to view Cluster topology">
+          <span class="status-pulse-dot" id="sidebar-pulse-dot"></span>
+          <span class="indicator-text" id="sidebar-indicator-text">4 PCs Online</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="app-main">
+      
+      <!-- Top Minimal Header (PRD Section 5) -->
+      <header class="top-header" role="banner">
+        <div class="header-left-group">
+          <!-- Mobile Sidebar Toggle -->
+          <button type="button" class="btn-icon-ghost mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          
+          <div class="header-chat-title-group">
+            <span class="active-chat-title" id="header-chat-title">New Chat</span>
+            <span class="active-agent-badge" id="header-agent-badge">AgentVerse Auto</span>
+          </div>
+        </div>
+
+        <div class="header-right-group">
+          <!-- Compact Infrastructure Indicator (PRD Section 5) -->
+          <button type="button" class="header-cluster-pill" id="header-cluster-btn" title="View Physical Cluster Topology">
+            <span class="status-pulse-dot online" id="header-status-dot"></span>
+            <span id="header-cluster-label">4 PCs Connected</span>
+          </button>
+
+          <!-- Search Trigger -->
+          <button type="button" class="btn-icon-ghost" id="global-search-btn" title="Search chats, runs, knowledge (Ctrl+K)" aria-label="Search">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+
+          <!-- Drawer Toggle -->
+          <button type="button" class="btn-icon-ghost" id="toggle-drawer-btn" title="Toggle Execution Drawer" aria-label="Execution Drawer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="views-wrapper">
+        
+        <!-- VIEW 1: Primary Chat Experience (PRD Section 6, 7, 8, 10, 11) -->
+        <section class="app-view active" id="view-chat">
+          <div class="chat-workspace">
+            
+            <!-- Chat Messages Scroll Container -->
+            <div class="chat-scroll-area" id="chat-scroll-area">
+              
+              <!-- Hero / Empty Landing State (PRD Section 39) -->
+              <div class="hero-landing" id="chat-hero-landing">
+                <div class="hero-logo-box">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <circle cx="19" cy="5" r="2"></circle>
+                    <circle cx="5" cy="19" r="2"></circle>
+                    <circle cx="19" cy="19" r="2"></circle>
+                    <line x1="12" y1="9" x2="19" y2="5"></line>
+                    <line x1="9.5" y1="13.5" x2="5" y2="19"></line>
+                    <line x1="14" y1="14" x2="19" y2="19"></line>
+                  </svg>
+                </div>
+                <h1 class="hero-headline">How can I help you today?</h1>
+                <p class="hero-subtext">Research • Analyze Data • Code • Document RAG</p>
+
+                <!-- Cluster Quick Status Row (PRD Section 39) -->
+                <div class="hero-cluster-strip">
+                  <span class="strip-label">Distributed Physical Cluster:</span>
+                  <div class="strip-nodes">
+                    <span class="strip-node-pill">💻 Research (PC A) <span class="dot-green">●</span></span>
+                    <span class="strip-node-pill">💻 Knowledge (PC B) <span class="dot-green">●</span></span>
+                    <span class="strip-node-pill">💻 Analytics (PC C) <span class="dot-green">●</span></span>
+                    <span class="strip-node-pill">💻 Control (PC D) <span class="dot-green">●</span></span>
+                  </div>
+                </div>
+
+                <!-- Prompt Preset Cards (PRD Section 6) -->
+                <div class="hero-prompt-suggestions">
+                  <button type="button" class="prompt-preset-card" data-prompt="Analyze quarterly sales data, search for competitor trends in 2025, and write a Python forecasting script.">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Full 4-PC Multi-Agent Workflow</div>
+                    <div class="card-desc">Orchestrates Research, RAG, Analytics, and Code generation across LAN</div>
+                  </button>
+                  <button type="button" class="prompt-preset-card" data-prompt="Search web for latest DeepSeek V3 benchmark results and summarize key findings.">
+                    <div class="card-icon">🌐</div>
+                    <div class="card-title">Web Research & Intelligence</div>
+                    <div class="card-desc">Dispatches to PC A running DuckDuckGo & URL extraction</div>
+                  </button>
+                  <button type="button" class="prompt-preset-card" data-prompt="Query indexed documents in Qdrant vector database and synthesize key findings.">
+                    <div class="card-icon">📚</div>
+                    <div class="card-title">Document & RAG Analysis</div>
+                    <div class="card-desc">Dispatches to PC B vector ingestion and embedding service</div>
+                  </button>
+                  <button type="button" class="prompt-preset-card" data-prompt="Calculate statistics on sales dataset and generate tested Python forecast code.">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Data Analytics & Code Sandbox</div>
+                    <div class="card-desc">Dispatches to PC C PythonREPL execution sandbox</div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Messages Flow (Populated dynamically) -->
+              <div class="messages-flow" id="messages-flow" style="display: none;">
+                <!-- Chat bubbles will be appended here -->
+              </div>
+
+              <!-- Typing / Orchestrating Indicator (PRD Section 13.4) -->
+              <div class="typing-indicator-row" id="typing-indicator" style="display: none;">
+                <div class="agent-avatar-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="19" r="2"></circle><line x1="12" y1="9" x2="19" y2="5"></line></svg>
+                </div>
+                <div class="typing-bubble">
+                  <span class="typing-status-text" id="typing-status-text">Orchestrator decomposing query across cluster...</span>
+                  <div class="typing-dots">
+                    <span class="t-dot"></span>
+                    <span class="t-dot"></span>
+                    <span class="t-dot"></span>
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </div>
-          <div class="preset-pills">
-            <span class="preset-label">Sample Prompts:</span>
-            <button type="button" class="preset-btn" data-query="Analyze quarterly sales data, search for competitor trends in 2025, and write a Python forecasting script.">Full 4-Node Multi-Agent Demo</button>
-            <button type="button" class="preset-btn" data-query="Search web for latest DeepSeek V3 benchmark results and summarize key architectural findings.">Research (Node A)</button>
-            <button type="button" class="preset-btn" data-query="Calculate revenue statistics on dataset and generate tested Python forecast code.">Analytics & Code (Node C)</button>
-          </div>
-        </div>
 
-        <form id="query-form" class="prompt-form">
-          <div class="textarea-wrapper">
-            <textarea id="query-input" placeholder="Type a prompt to orchestrate across cluster PCs..." rows="3" required></textarea>
-            <div class="input-actions">
-              <button type="submit" id="submit-btn" class="btn-execute">
-                <span class="btn-text">Execute on Cluster</span>
-                <span class="btn-icon">🚀</span>
+            <!-- Prompt Composer Bar (PRD Section 7, 8, 9) -->
+            <div class="composer-container">
+              <!-- Staged File Chips Preview (PRD Section 48) -->
+              <div class="staged-files-bar" id="staged-files-bar" style="display: none;">
+                <div class="file-chip">
+                  <span class="chip-icon">📄</span>
+                  <span class="chip-name" id="staged-chip-name">document.pdf</span>
+                  <span class="chip-size" id="staged-chip-size">(1.2 MB)</span>
+                  <button type="button" class="btn-chip-remove" id="btn-chip-remove">&times;</button>
+                </div>
+              </div>
+
+              <form class="composer-form" id="composer-form">
+                <!-- Textarea for query -->
+                <div class="composer-textarea-wrap">
+                  <textarea 
+                    id="composer-input" 
+                    rows="1" 
+                    placeholder="Ask AgentVerse anything... (automatically coordinates agents & cluster PCs)"
+                    required
+                  ></textarea>
+                </div>
+
+                <!-- Composer Bottom Toolbar -->
+                <div class="composer-toolbar">
+                  <div class="toolbar-left">
+                    <!-- File Upload Button (PRD Section 7) -->
+                    <input type="file" id="file-picker-input" style="display: none;" accept=".pdf,.csv,.json,.txt,.py,.log,.md">
+                    <button type="button" class="composer-tool-btn" id="btn-attach-file" title="Attach documents, CSV, or code">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                      </svg>
+                      <span class="btn-label-text">Add file</span>
+                    </button>
+
+                    <!-- Intelligent Agent Selector Dropdown (PRD Section 8 & 9) -->
+                    <div class="agent-mode-dropdown-wrap">
+                      <button type="button" class="composer-tool-btn agent-mode-pill" id="btn-agent-mode" aria-expanded="false">
+                        <span class="agent-dot">●</span>
+                        <span id="current-agent-mode-label">AgentVerse Auto</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </button>
+
+                      <!-- Dropdown Menu -->
+                      <div class="agent-mode-menu" id="agent-mode-menu" style="display: none;">
+                        <div class="menu-header">Select execution mode</div>
+                        <button type="button" class="mode-option-btn active" data-mode="auto">
+                          <div class="option-check">●</div>
+                          <div class="option-info">
+                            <div class="option-title">Auto (Recommended)</div>
+                            <div class="option-desc">AgentVerse Planner coordinates all nodes</div>
+                          </div>
+                        </button>
+                        <button type="button" class="mode-option-btn" data-mode="research">
+                          <div class="option-check">○</div>
+                          <div class="option-info">
+                            <div class="option-title">Research (PC A)</div>
+                            <div class="option-desc">Web search & fact retrieval</div>
+                          </div>
+                        </button>
+                        <button type="button" class="mode-option-btn" data-mode="document">
+                          <div class="option-check">○</div>
+                          <div class="option-info">
+                            <div class="option-title">Documents (PC B)</div>
+                            <div class="option-desc">PDF / Document analysis & RAG</div>
+                          </div>
+                        </button>
+                        <button type="button" class="mode-option-btn" data-mode="analytics">
+                          <div class="option-check">○</div>
+                          <div class="option-info">
+                            <div class="option-title">Data Analysis (PC C)</div>
+                            <div class="option-desc">Statistics & Python Sandbox execution</div>
+                          </div>
+                        </button>
+                        <button type="button" class="mode-option-btn" data-mode="code">
+                          <div class="option-check">○</div>
+                          <div class="option-info">
+                            <div class="option-title">Code Generation (PC C)</div>
+                            <div class="option-desc">Full code implementation & testing</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-right">
+                    <!-- Send Button (PRD Section 7) -->
+                    <button type="submit" class="btn-send-message" id="btn-send-message" title="Execute query across cluster">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- VIEW 2: Dedicated Physical Cluster Topology (PRD Section 14, 15, 16, 20, 21, 22) -->
+        <section class="app-view" id="view-cluster">
+          <div class="cluster-page-container">
+            
+            <!-- Cluster Header (PRD Section 15 & 20) -->
+            <div class="cluster-view-header">
+              <div>
+                <h2 class="view-title">Physical Cluster Infrastructure</h2>
+                <p class="view-subtitle">LAN Gateway: 0.0.0.0:8000 • Private Network • Latency 2.8ms</p>
+              </div>
+              <div class="cluster-header-actions">
+                <span class="cluster-health-badge" id="cluster-all-healthy-badge">
+                  <span class="dot-green">●</span> All 4 Systems Operational
+                </span>
+                <button type="button" class="btn-action-primary" id="btn-open-connect-wizard">
+                  + Connect PC
+                </button>
+              </div>
+            </div>
+
+            <!-- Interactive Network Topology Visualizer (PRD Section 15 & 16) -->
+            <div class="topology-canvas-card">
+              <div class="canvas-legend">
+                <span class="legend-item"><span class="legend-dot control"></span> Master Gateway</span>
+                <span class="legend-item"><span class="legend-dot worker"></span> Specialized Worker Nodes</span>
+                <span class="legend-item"><span class="legend-line"></span> LAN Mesh (HTTP)</span>
+              </div>
+
+              <!-- Topological Node Architecture Diagram -->
+              <div class="topology-tree-diagram">
+                <!-- Master Node (PC D) -->
+                <div class="diagram-level-top">
+                  <div class="topology-node-box master-node" id="node-box-laptop_d" data-node-key="laptop_d">
+                    <div class="node-box-header">
+                      <span class="node-icon">💻</span>
+                      <span class="node-title">PC D (Control Gateway)</span>
+                      <span class="node-status-dot online"></span>
+                    </div>
+                    <div class="node-box-body">
+                      <div class="node-meta-line"><strong>Role:</strong> Orchestrator & Planner</div>
+                      <div class="node-meta-line"><strong>IP:</strong> 192.168.1.30:8000 (0.0.0.0)</div>
+                      <div class="node-meta-line"><strong>Core:</strong> Ollama qwen2.5:1.5b</div>
+                    </div>
+                    <div class="node-box-footer">
+                      <span class="node-status-label">● Master Online</span>
+                      <button type="button" class="btn-node-inspect">Inspect ↗</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Animated Connection Trunk (PRD Section 17) -->
+                <div class="diagram-connector-trunk">
+                  <div class="trunk-vertical-line"></div>
+                  <div class="trunk-horizontal-bar"></div>
+                </div>
+
+                <!-- Worker Nodes Row (PC A, PC B, PC C) -->
+                <div class="diagram-level-bottom">
+                  <!-- Node A -->
+                  <div class="topology-node-box worker-node" id="node-box-laptop_a" data-node-key="laptop_a">
+                    <div class="node-box-header">
+                      <span class="node-icon">🌐</span>
+                      <span class="node-title">PC A (Research)</span>
+                      <span class="node-status-dot online"></span>
+                    </div>
+                    <div class="node-box-body">
+                      <div class="node-meta-line"><strong>Role:</strong> Web Search & Extraction</div>
+                      <div class="node-meta-line"><strong>IP:</strong> 192.168.1.26:8000</div>
+                      <div class="node-meta-line"><strong>Tools:</strong> DuckDuckGo, BeautifulSoup</div>
+                    </div>
+                    <div class="node-box-footer">
+                      <span class="node-status-label">● Online (42ms)</span>
+                      <button type="button" class="btn-node-inspect">Inspect ↗</button>
+                    </div>
+                  </div>
+
+                  <!-- Node B -->
+                  <div class="topology-node-box worker-node" id="node-box-laptop_b" data-node-key="laptop_b">
+                    <div class="node-box-header">
+                      <span class="node-icon">📚</span>
+                      <span class="node-title">PC B (Document RAG)</span>
+                      <span class="node-status-dot online"></span>
+                    </div>
+                    <div class="node-box-body">
+                      <div class="node-meta-line"><strong>Role:</strong> Document Ingestion & Qdrant</div>
+                      <div class="node-meta-line"><strong>IP:</strong> 192.168.1.11:8000</div>
+                      <div class="node-meta-line"><strong>Model:</strong> nomic-embed-text</div>
+                    </div>
+                    <div class="node-box-footer">
+                      <span class="node-status-label">● Online (28ms)</span>
+                      <button type="button" class="btn-node-inspect">Inspect ↗</button>
+                    </div>
+                  </div>
+
+                  <!-- Node C -->
+                  <div class="topology-node-box worker-node" id="node-box-laptop_c" data-node-key="laptop_c">
+                    <div class="node-box-header">
+                      <span class="node-icon">⚡</span>
+                      <span class="node-title">PC C (Analytics & Code)</span>
+                      <span class="node-status-dot online"></span>
+                    </div>
+                    <div class="node-box-body">
+                      <div class="node-meta-line"><strong>Role:</strong> Data Analysis & Sandbox</div>
+                      <div class="node-meta-line"><strong>IP:</strong> 192.168.1.12:8000</div>
+                      <div class="node-meta-line"><strong>Sandbox:</strong> PythonREPL Sandbox</div>
+                    </div>
+                    <div class="node-box-footer">
+                      <span class="node-status-label">● Online (35ms)</span>
+                      <button type="button" class="btn-node-inspect">Inspect ↗</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Two-Column Grid: Technical Details & Live Activity (PRD Section 21 & 22) -->
+            <div class="cluster-subgrid">
+              
+              <!-- Technical Connection Details (PRD Section 21) -->
+              <div class="details-card">
+                <div class="details-card-header">
+                  <h3 class="card-heading">LAN Network Protocol Details</h3>
+                  <button type="button" class="btn-icon-subtle" id="btn-refresh-cluster-diag" title="Test cluster endpoints">🔄 Sync</button>
+                </div>
+                <div class="spec-table">
+                  <div class="spec-row">
+                    <span class="spec-key">Network Protocol</span>
+                    <span class="spec-val">HTTP / JSON REST over LAN</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-key">Gateway Host</span>
+                    <span class="spec-val" id="spec-gateway-host">0.0.0.0:8000 (Laptop D)</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-key">Node Discovery</span>
+                    <span class="spec-val">Automatic Registry (registry.py)</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-key">Data Locality</span>
+                    <span class="spec-val">LAN Only (Zero cloud telemetry)</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-key">Heartbeat Interval</span>
+                    <span class="spec-val">2.4 sec (Avg Latency: 28ms)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Cluster Activity Feed (PRD Section 22) -->
+              <div class="details-card">
+                <div class="details-card-header">
+                  <h3 class="card-heading">Live Cluster Activity</h3>
+                  <span class="live-activity-badge">Live</span>
+                </div>
+                <div class="activity-feed" id="activity-feed-list">
+                  <div class="activity-item">
+                    <span class="activity-time">14:02:32</span>
+                    <span class="activity-dot green">●</span>
+                    <span class="activity-text"><strong>Research Node (PC A):</strong> Completed web retrieval</span>
+                  </div>
+                  <div class="activity-item">
+                    <span class="activity-time">14:02:31</span>
+                    <span class="activity-dot green">●</span>
+                    <span class="activity-text"><strong>Analytics Node (PC C):</strong> Python REPL sandbox ready</span>
+                  </div>
+                  <div class="activity-item">
+                    <span class="activity-time">14:02:29</span>
+                    <span class="activity-dot green">●</span>
+                    <span class="activity-text"><strong>RAG Node (PC B):</strong> Qdrant vector database connected</span>
+                  </div>
+                  <div class="activity-item">
+                    <span class="activity-time">14:02:27</span>
+                    <span class="activity-dot green">●</span>
+                    <span class="activity-text"><strong>Control Gateway (PC D):</strong> Orchestrator listening on port 8000</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- VIEW 3: Knowledge / RAG Ingestion (PRD Section 28 & 29) -->
+        <section class="app-view" id="view-knowledge">
+          <div class="knowledge-page-container">
+            <div class="knowledge-header">
+              <div>
+                <h2 class="view-title">Knowledge Collections & RAG Index</h2>
+                <p class="view-subtitle">Documents indexed on Laptop B (Qdrant Vector Database)</p>
+              </div>
+              <button type="button" class="btn-action-primary" id="btn-add-document">
+                + Add Documents
               </button>
             </div>
+
+            <!-- Collection Summary Cards (PRD Section 28) -->
+            <div class="collections-cards-grid">
+              <div class="collection-stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">Project Documents</span>
+                  <span class="badge-status online">● Indexed</span>
+                </div>
+                <div class="stat-main">128 Documents</div>
+                <div class="stat-meta">1,240 Chunks in Qdrant (nomic-embed-text)</div>
+              </div>
+              <div class="collection-stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">Vector Storage Location</span>
+                  <span class="badge-status online">PC B (LAN)</span>
+                </div>
+                <div class="stat-main">192.168.1.11:6333</div>
+                <div class="stat-meta">Dense cosine similarity search</div>
+              </div>
+            </div>
+
+            <!-- Documents Table (PRD Section 28) -->
+            <div class="table-card">
+              <div class="table-header-row">
+                <span class="th-name">Document Name</span>
+                <span class="th-chunks">Chunks</span>
+                <span class="th-model">Embedding Core</span>
+                <span class="th-status">Index Status</span>
+                <span class="th-action">Action</span>
+              </div>
+              <div class="table-body">
+                <div class="table-row">
+                  <span class="td-name">📄 quarterly_financial_report.pdf</span>
+                  <span class="td-chunks">84 chunks</span>
+                  <span class="td-model">nomic-embed-text</span>
+                  <span class="td-status"><span class="dot-green">●</span> Indexed</span>
+                  <button type="button" class="td-btn-view" onclick="viewDocDetails('quarterly_financial_report.pdf')">Inspect ↗</button>
+                </div>
+                <div class="table-row">
+                  <span class="td-name">📊 company_sales_dataset.csv</span>
+                  <span class="td-chunks">32 chunks</span>
+                  <span class="td-model">nomic-embed-text</span>
+                  <span class="td-status"><span class="dot-green">●</span> Indexed</span>
+                  <button type="button" class="td-btn-view" onclick="viewDocDetails('company_sales_dataset.csv')">Inspect ↗</button>
+                </div>
+                <div class="table-row">
+                  <span class="td-name">📄 system_architecture_manual.pdf</span>
+                  <span class="td-chunks">126 chunks</span>
+                  <span class="td-model">nomic-embed-text</span>
+                  <span class="td-status"><span class="dot-green">●</span> Indexed</span>
+                  <button type="button" class="td-btn-view" onclick="viewDocDetails('system_architecture_manual.pdf')">Inspect ↗</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: Workflow Execution Runs (PRD Section 23, 24, 25) -->
+        <section class="app-view" id="view-runs">
+          <div class="runs-page-container">
+            <div class="runs-header">
+              <div>
+                <h2 class="view-title">Multi-Agent Cluster Runs</h2>
+                <p class="view-subtitle">Chronological record of distributed tasks dispatched across physical PCs</p>
+              </div>
+              <button type="button" class="btn-icon-subtle" id="btn-refresh-runs">🔄 Refresh</button>
+            </div>
+
+            <!-- Runs Cards List (PRD Section 23) -->
+            <div class="runs-list" id="runs-history-container">
+              <div class="run-card" onclick="openExecutionDrawerForRun('AV-1042')">
+                <div class="run-card-top">
+                  <div class="run-id-title">
+                    <span class="run-id">#AV-1042</span>
+                    <span class="run-title">Full 4-PC Multi-Agent Workflow: Sales Forecasting</span>
+                  </div>
+                  <span class="run-status-badge completed">● Completed (24.2s)</span>
+                </div>
+                <div class="run-pipeline-preview">
+                  <span class="step-pill">Planner (PC D)</span>
+                  <span class="step-arrow">→</span>
+                  <span class="step-pill">Research (PC A)</span>
+                  <span class="step-arrow">→</span>
+                  <span class="step-pill">Analytics & Code (PC C)</span>
+                  <span class="step-arrow">→</span>
+                  <span class="step-pill">Evaluator (PC D)</span>
+                </div>
+              </div>
+
+              <div class="run-card" onclick="openExecutionDrawerForRun('AV-1041')">
+                <div class="run-card-top">
+                  <div class="run-id-title">
+                    <span class="run-id">#AV-1041</span>
+                    <span class="run-title">DeepSeek V3 Web Intelligence & Architectural Summary</span>
+                  </div>
+                  <span class="run-status-badge completed">● Completed (11.8s)</span>
+                </div>
+                <div class="run-pipeline-preview">
+                  <span class="step-pill">Planner (PC D)</span>
+                  <span class="step-arrow">→</span>
+                  <span class="step-pill">Web Search (PC A)</span>
+                  <span class="step-arrow">→</span>
+                  <span class="step-pill">Synthesizer (PC D)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: Settings (PRD Section 31 & 54) -->
+        <section class="app-view" id="view-settings">
+          <div class="settings-page-container">
+            <h2 class="view-title">Settings</h2>
+            <p class="view-subtitle">Workspace preferences, animation tokens, and local LAN cluster configuration</p>
+
+            <div class="settings-sections">
+              <!-- General Settings -->
+              <div class="settings-card">
+                <h3 class="settings-card-title">General & Appearance</h3>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Theme Mode</div>
+                    <div class="setting-desc">Clean, minimal light AI workspace (PRD standard)</div>
+                  </div>
+                  <span class="setting-pill">Light / White (Default)</span>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Anime.js Animations (PRD Section 54)</div>
+                    <div class="setting-desc">Control motion and micro-interaction transitions</div>
+                  </div>
+                  <select id="setting-animation-mode" class="setting-select">
+                    <option value="full" selected>Full (Smooth Anime.js)</option>
+                    <option value="reduced">Reduced Motion</option>
+                    <option value="off">Off (Instant)</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Default Agent Execution Mode</div>
+                    <div class="setting-desc">How new queries are assigned</div>
+                  </div>
+                  <span class="setting-pill">AgentVerse Auto (Planner DAG)</span>
+                </div>
+              </div>
+
+              <!-- Cluster & Privacy Settings (PRD Section 31) -->
+              <div class="settings-card">
+                <h3 class="settings-card-title">Cluster & Privacy</h3>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Local Network Only (Zero Cloud)</div>
+                    <div class="setting-desc">Enforces local LAN isolation. Data never leaves your physical Wi-Fi.</div>
+                  </div>
+                  <span class="setting-toggle-active">● Enabled</span>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Heartbeat Poll Rate</div>
+                    <div class="setting-desc">Frequency of node health checks</div>
+                  </div>
+                  <span class="setting-pill">2.4 seconds</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Execution Drawer (Slide-in Right Drawer - PRD Section 49 & 24 & 25) -->
+    <div class="execution-drawer" id="execution-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="drawer-icon">⚡</span>
+          <div>
+            <h3 class="drawer-title">Execution Graph</h3>
+            <p class="drawer-subtitle" id="drawer-run-id">Run #AV-1042 • Physical PC Assignment</p>
+          </div>
+        </div>
+        <button type="button" class="btn-drawer-close" id="btn-drawer-close" aria-label="Close drawer">&times;</button>
+      </div>
+
+      <!-- Drawer View Mode Selector: Simple vs DAG (PRD Section 27) -->
+      <div class="drawer-tabs">
+        <button type="button" class="drawer-tab-btn active" data-tab="simple" id="btn-tab-simple">Simple Flow</button>
+        <button type="button" class="drawer-tab-btn" data-tab="dag" id="btn-tab-dag">Technical DAG</button>
+      </div>
+
+      <div class="drawer-body">
+        
+        <!-- Tab 1: Simple Graph with Physical PC Assignment (PRD Section 25) -->
+        <div class="drawer-tab-content active" id="tab-content-simple">
+          <div class="exec-step-card">
+            <div class="exec-step-num">1</div>
+            <div class="exec-step-details">
+              <div class="step-role-title">Planner & Orchestrator</div>
+              <div class="step-agent-desc">Decomposed query into async dependency tasks</div>
+              <div class="step-pc-tag">📍 Executed on <strong>Laptop D (Master)</strong></div>
+            </div>
+            <span class="step-status-tag done">✓ 0.4s</span>
+          </div>
+
+          <div class="exec-connector-line"></div>
+
+          <div class="exec-step-card">
+            <div class="exec-step-num">2</div>
+            <div class="exec-step-details">
+              <div class="step-role-title">Research Agent (Web Intelligence)</div>
+              <div class="step-agent-desc">Queried DuckDuckGo, parsed snippets and market data</div>
+              <div class="step-pc-tag">📍 Executed on <strong>Laptop A (Research)</strong></div>
+            </div>
+            <span class="step-status-tag done">✓ 2.1s</span>
+          </div>
+
+          <div class="exec-connector-line"></div>
+
+          <div class="exec-step-card">
+            <div class="exec-step-num">3</div>
+            <div class="exec-step-details">
+              <div class="step-role-title">Analytics & Code Sandbox</div>
+              <div class="step-agent-desc">Ran calculation in PythonREPL sandbox & generated script</div>
+              <div class="step-pc-tag">📍 Executed on <strong>Laptop C (Analytics)</strong></div>
+            </div>
+            <span class="step-status-tag done">✓ 3.4s</span>
+          </div>
+
+          <div class="exec-connector-line"></div>
+
+          <div class="exec-step-card">
+            <div class="exec-step-num">4</div>
+            <div class="exec-step-details">
+              <div class="step-role-title">Evaluator & Synthesizer (PRD Section 50)</div>
+              <div class="step-agent-desc">Verified code syntax and compiled cohesive final answer</div>
+              <div class="step-pc-tag">📍 Executed on <strong>Laptop D (Master)</strong></div>
+            </div>
+            <span class="step-status-tag done">✓ 1.2s</span>
+          </div>
+        </div>
+
+        <!-- Tab 2: Technical DAG View (PRD Section 27) -->
+        <div class="drawer-tab-content" id="tab-content-dag" style="display: none;">
+          <pre class="dag-code-viewer"><code id="dag-raw-json">task_01:
+  target: planner
+  assigned_pc: Laptop-D
+  status: completed
+  duration: 0.42s
+
+task_02:
+  target: research
+  assigned_pc: Laptop-A
+  endpoint: http://192.168.1.26:8000/node_a/research/execute
+  status: completed
+  duration: 2.14s
+
+task_03:
+  target: analytics_and_code
+  assigned_pc: Laptop-C
+  endpoint: http://192.168.1.12:8000/node_c/data/analyze
+  dependencies: [task_01, task_02]
+  status: completed
+  duration: 3.41s
+
+task_04:
+  target: evaluator_synthesis
+  assigned_pc: Laptop-D
+  status: completed
+  duration: 1.20s</code></pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Connect PC Wizard Modal (PRD Section 41 & 42) -->
+  <div class="modal-backdrop" id="connect-wizard-modal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-box">💻</div>
+          <div>
+            <h3 class="modal-title">Connect Physical PC</h3>
+            <p class="modal-subtitle">Add a LAN workstation to your cluster</p>
+          </div>
+        </div>
+        <button type="button" class="btn-modal-close" onclick="closeAllModals()">&times;</button>
+      </div>
+
+      <!-- 5-Stage Wizard Progress (PRD Section 42) -->
+      <div class="wizard-steps-indicator">
+        <div class="w-step active" id="w-step-1">1. Network</div>
+        <div class="w-step" id="w-step-2">2. API</div>
+        <div class="w-step" id="w-step-3">3. Agent</div>
+        <div class="w-step" id="w-step-4">4. Model</div>
+        <div class="w-step" id="w-step-5">5. Ready</div>
+      </div>
+
+      <div class="modal-body">
+        <form id="connect-pc-form">
+          <div class="form-group">
+            <label for="wizard-pc-name" class="form-label">Workstation Name</label>
+            <input type="text" id="wizard-pc-name" class="form-input" placeholder="e.g. Laptop E (Vision Node)" required>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="wizard-pc-ip" class="form-label">LAN IP Address</label>
+              <input type="text" id="wizard-pc-ip" class="form-input" placeholder="192.168.1.50" required>
+            </div>
+            <div class="form-group">
+              <label for="wizard-pc-port" class="form-label">Port</label>
+              <input type="number" id="wizard-pc-port" class="form-input" value="8000" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="wizard-pc-role" class="form-label">Agent Role</label>
+            <select id="wizard-pc-role" class="form-select">
+              <option value="research">Web Research & Search</option>
+              <option value="document">Document RAG & Embeddings</option>
+              <option value="analytics">Data Analytics & Code</option>
+              <option value="custom">Custom Agent Microservice</option>
+            </select>
+          </div>
+
+          <!-- Live Step Test Output -->
+          <div class="wizard-test-log" id="wizard-test-log" style="display: none;">
+            <div class="w-log-line" id="w-log-1">Testing network reachability...</div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="button" class="btn-action-secondary" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn-action-primary" id="btn-wizard-submit">Test & Connect</button>
           </div>
         </form>
-      </section>
+      </div>
+    </div>
+  </div>
 
-      <!-- Real-time Cluster Dispatch & Results Canvas -->
-      <section class="results-canvas" id="results-section" style="display: none;">
-        <div class="canvas-header">
-          <div class="canvas-title-group">
-            <div class="canvas-icon">📊</div>
-            <div>
-              <h3 id="canvas-status-title">Cluster Execution Pipeline</h3>
-              <p id="canvas-status-subtitle">Orchestrating tasks across nodes...</p>
-            </div>
-          </div>
-          <div id="execution-meta-badge" class="meta-badge">Session: Active</div>
-        </div>
-
-        <!-- Task DAG Visualizer -->
-        <div class="pipeline-section">
-          <div class="pipeline-title">Task Decomposition & Node Mapping (DAG)</div>
-          <div class="dispatch-map" id="dispatch-map">
-            <!-- Dynamic task badges -->
+  <!-- Node Diagnostics Modal (PRD Section 18 & 44) -->
+  <div class="modal-backdrop" id="node-modal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-box" id="node-modal-icon">💻</div>
+          <div>
+            <h3 class="modal-title" id="node-modal-title">Laptop A (Research Node)</h3>
+            <p class="modal-subtitle" id="node-modal-subtitle">Inspecting physical cluster hardware node</p>
           </div>
         </div>
+        <button type="button" class="btn-modal-close" onclick="closeAllModals()">&times;</button>
+      </div>
+      <div class="modal-body" id="node-modal-body">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
 
-        <!-- Dynamic Output Container -->
-        <div class="response-card" id="response-card">
-          <!-- Populated with rich card components -->
-        </div>
-      </section>
-    </main>
-
-    <!-- Node Inspection Modal -->
-    <div id="node-modal" class="modal-backdrop" style="display: none;">
-      <div class="modal-window">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <div class="modal-node-icon" id="modal-icon">🖥️</div>
-            <div>
-              <h3 id="modal-title">Node Diagnostics</h3>
-              <p id="modal-subtitle">Inspecting physical cluster hardware node</p>
-            </div>
+  <!-- Document Details Modal (PRD Section 29) -->
+  <div class="modal-backdrop" id="doc-modal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-box">📄</div>
+          <div>
+            <h3 class="modal-title" id="doc-modal-title">Document Inspection</h3>
+            <p class="modal-subtitle" id="doc-modal-subtitle">Retrieved Vector Context & Chunks</p>
           </div>
-          <button id="modal-close" class="modal-close-btn" aria-label="Close modal">&times;</button>
         </div>
-        <div class="modal-body" id="modal-body">
-          <!-- Populated dynamically -->
+        <button type="button" class="btn-modal-close" onclick="closeAllModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="doc-meta-card" id="doc-modal-meta">
+          <strong>Vector DB:</strong> Qdrant (Connected on Laptop B)<br>
+          <strong>Similarity Metric:</strong> Cosine (Threshold: 0.85)
+        </div>
+        <div class="doc-chunk-preview">
+          <pre><code id="doc-modal-snippet">Sample retrieved chunk from Qdrant vector store...</code></pre>
+        </div>
+        <div class="modal-footer-actions">
+          <button type="button" class="btn-action-secondary" onclick="closeAllModals()">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/anime.min.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
