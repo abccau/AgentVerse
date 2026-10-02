@@ -2,14 +2,7 @@ laptop: worker_1
 bind_host: "0.0.0.0"
 
 agents:
-  - name: research
-    expose: true
-    handler: "nodes.research.research_agent:handle"
-    model: "qwen3:8b"
   - name: coding
     expose: true
     handler: "nodes.coding.coding_agent:handle"
     model: "qwen2.5-coder:7b"
-  - name: tools
-    expose: true
-    handler: "nodes.tools.tool_router:handle"
