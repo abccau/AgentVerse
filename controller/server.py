@@ -45,12 +45,17 @@ async def get_cluster_status():
     network = load_config(os.path.join(BASE_DIR, "config", "network.yaml"))
     laptops = network.get("laptops", {})
     
+    worker_1_cfg = laptops.get('worker_1', laptops.get('workers', {}))
+    worker_2_cfg = laptops.get('worker_2', laptops.get('workers', {}))
+    brain_cfg = laptops.get('brain', {})
+    controller_cfg = laptops.get('controller', {})
+
     node_definitions = {
         "laptop_d": {
             "name": "PC D (Control Gateway)",
             "role": "Routing & Orchestration Master",
             "model": "qwen2.5:1.5b",
-            "url": "http://127.0.0.1:3000",
+            "url": f"http://{controller_cfg.get('ip', '127.0.0.1')}:3000",
             "tools": ["Router", "QueryDispatcher", "ClusterMesh"],
             "default_status": "ONLINE"
         },
@@ -58,27 +63,28 @@ async def get_cluster_status():
             "name": "PC A (Brain Node)",
             "role": "Planner & Orchestrator",
             "model": "qwen3:8b",
-            "url": f"http://{laptops.get('brain', {}).get('ip', '127.0.0.1')}:{laptops.get('brain', {}).get('port', 8001)}",
+            "url": f"http://{brain_cfg.get('ip', '127.0.0.1')}:{brain_cfg.get('port', 8001)}",
             "tools": ["PlannerAgent", "Orchestrator"],
-            "ping_url": f"http://{laptops.get('brain', {}).get('ip', '127.0.0.1')}:{laptops.get('brain', {}).get('port', 8001)}/health"
+            "ping_url": f"http://{brain_cfg.get('ip', '127.0.0.1')}:{brain_cfg.get('port', 8001)}/health"
         },
         "laptop_b": {
-            "name": "PC B (Workers Node)",
-            "role": "Research, Coding & Tools",
-            "model": "qwen2.5-coder:7b",
-            "url": f"http://{laptops.get('workers', {}).get('ip', '127.0.0.1')}:{laptops.get('workers', {}).get('port', 8003)}",
-            "tools": ["DuckDuckGoSearch", "CodeGenerator", "Calculator"],
-            "ping_url": f"http://{laptops.get('workers', {}).get('ip', '127.0.0.1')}:{laptops.get('workers', {}).get('port', 8003)}/health"
+            "name": "PC B (Worker 1 - Research)",
+            "role": "Web Search & Extraction",
+            "model": "qwen3:8b",
+            "url": f"http://{worker_1_cfg.get('ip', '127.0.0.1')}:{worker_1_cfg.get('port', 8003)}",
+            "tools": ["DuckDuckGoSearch", "URLContentReader", "ToolsRouter"],
+            "ping_url": f"http://{worker_1_cfg.get('ip', '127.0.0.1')}:{worker_1_cfg.get('port', 8003)}/health"
         },
         "laptop_c": {
-            "name": "PC C (Data & Sandbox)",
-            "role": "Document Vector & Data Sandbox",
-            "model": "nomic-embed-text",
-            "url": "http://192.168.1.12:8000",
-            "tools": ["QdrantVectorStore", "PythonREPLSandbox"],
-            "default_status": "ONLINE"
+            "name": "PC C (Worker 2 - Coding)",
+            "role": "Code Generation & Sandbox",
+            "model": "qwen2.5-coder:7b",
+            "url": f"http://{worker_2_cfg.get('ip', '127.0.0.1')}:{worker_2_cfg.get('port', 8003)}",
+            "tools": ["CodeGenerator", "PythonREPLSandbox", "ToolsRouter"],
+            "ping_url": f"http://{worker_2_cfg.get('ip', '127.0.0.1')}:{worker_2_cfg.get('port', 8003)}/health"
         }
     }
+
     
     online_count = 0
     total_count = len(node_definitions)
@@ -156,17 +162,23 @@ async def execute_query(payload: QueryPayload):
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed communicating with {target_agent} at {agent_url}: {str(e)}")
         
-    assigned_pc = "Laptop B (Brain Node)" if target_agent in ["orchestrator", "planner"] else "Laptop C (Workers Node)"
-    
+    if target_agent in ["orchestrator", "planner"]:
+        assigned_pc = "Laptop A (Brain Node)"
+    elif target_agent in ["research"]:
+        assigned_pc = "Laptop B (Worker 1 - Research)"
+    else:
+        assigned_pc = "Laptop C (Worker 2 - Coding & Tools)"
+        
     cluster_plan = [
         {
             "step": 1,
             "agent": "Planner",
             "target_agent": "planner",
-            "assigned_pc": "Laptop B (Brain - Port 8001)",
+            "assigned_pc": "Laptop A (Brain - Port 8001)",
             "node_url": registry.get("planner", agent_url),
             "status": "COMPLETED"
         },
+
         {
             "step": 2,
             "agent": target_agent.capitalize(),
