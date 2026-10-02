@@ -635,25 +635,27 @@ body {
 }
 
 /* Inline code in bubble text (ONLY for non-pre inline code) */
-.bubble-text code:not(.code-box-pre code):not(pre code) {
+.bubble-text code.inline-code,
+.bubble-text p > code,
+.bubble-text li > code {
   font-family: var(--font-mono);
   font-size: 0.85em;
-  background-color: var(--bg-tertiary);
-  color: #1e293b;
+  background-color: #f1f5f9;
+  color: #0f172a;
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid var(--border-subtle);
-  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
 }
 
-/* Code Blocks Container - Sleek Modern Dark Surface */
+/* Code Blocks Container - Light Theme Card, NO BLACK PATCH */
 .code-pre-box {
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: var(--radius-md);
-  margin: 12px 0;
+  margin: 14px 0;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 /* Code Block Header with Language and Copy Button */
@@ -661,50 +663,57 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #161b22;
-  border-bottom: 1px solid #30363d;
-  padding: 6px 14px;
+  background-color: #f1f5f9 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 7px 14px;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   user-select: none;
 }
 
 .code-box-lang {
-  color: #58a6ff;
-  font-weight: 600;
+  color: #2563eb !important;
+  font-weight: 700;
   text-transform: lowercase;
   letter-spacing: 0.5px;
 }
 
 .code-copy-btn {
-  background: transparent;
-  border: none;
-  color: #8b949e;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 0.74rem;
   font-family: var(--font-mono);
-  padding: 3px 8px;
+  font-weight: 500;
+  padding: 3px 9px;
   border-radius: 4px;
   transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .code-copy-btn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.code-copy-btn svg {
+  stroke: currentColor;
 }
 
 .code-box-pre {
   margin: 0 !important;
   padding: 14px 16px !important;
-  background-color: #0d1117 !important;
+  background-color: #f8fafc !important;
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-/* Ensure code inside code-pre-box has NO white patch, crisp font and color */
+/* Ensure code inside code-pre-box has NO background patches, NO black box, and DARK BLACK text */
 .code-box-pre code,
 .code-pre-box code,
 pre.code-pre-box code,
@@ -712,10 +721,11 @@ pre code {
   display: block;
   background: transparent !important;
   background-color: transparent !important;
-  color: #e6edf3 !important;
+  color: #0f172a !important; /* DARK BLACK TEXT */
   font-family: var(--font-mono) !important;
-  font-size: 0.85rem !important;
-  line-height: 1.6 !important;
+  font-size: 0.86rem !important;
+  font-weight: 500 !important;
+  line-height: 1.65 !important;
   padding: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -723,11 +733,16 @@ pre code {
   box-shadow: none !important;
 }
 
-/* Universal defense: Ensure NO nested span/element inside code blocks ever gets background */
-.code-pre-box *:not(.code-box-header):not(.code-copy-btn):not(.code-copy-btn *) {
+/* Complete defense: NO nested element inside code blocks gets background stripes */
+.code-pre-box pre,
+.code-pre-box code,
+.code-pre-box span:not(.code-box-lang):not(.code-copy-btn *),
+.code-box-pre * {
   background-color: transparent !important;
+  background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  color: #0f172a !important; /* DARK BLACK TEXT */
 }
 
 /* PRD Section 11: "How AgentVerse Worked" Component */

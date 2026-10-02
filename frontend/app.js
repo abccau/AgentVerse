@@ -402,7 +402,13 @@ function formatMarkdown(text) {
     md = md.replace(`__AV_CODE_BLOCK_${idx}__`, block);
   });
 
-  return `<p>${md}</p>`;
+  // Clean up paragraph wrappers around block-level code boxes
+  md = `<p>${md}</p>`
+    .replace(/<p>\s*(<div class="code-pre-box">[\s\S]*?<\/div>)\s*<\/p>/g, '$1')
+    .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, '')
+    .replace(/<p>\s*<\/p>/g, '');
+
+  return md;
 }
 
 // ==========================================================================
