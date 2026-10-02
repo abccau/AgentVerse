@@ -23,7 +23,7 @@ def mount_agent(name, handler_path):
             from common.schemas import QueryRequest
             req = QueryRequest(**request)
             resp = await handler(req)
-            return resp.dict()
+            return resp.model_dump()
         except Exception as e:
             return {"status": "error", "answer": str(e), "metadata": {"error_code": "INTERNAL"}}
             

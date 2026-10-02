@@ -19,5 +19,8 @@ def get_registry(base_dir: str = ".") -> dict:
                     for agent in role_config.get("agents", []):
                         if agent.get("expose"):
                             name = agent.get("name")
-                            registry[name] = f"http://{ip}:{port}/{name}/process"
+                            url = f"http://{ip}:{port}/{name}/process"
+                            if name not in registry:
+                                registry[name] = []
+                            registry[name].append(url)
     return registry

@@ -14,12 +14,13 @@ async def main():
     args = parser.parse_args()
 
     registry = get_registry()
-    if args.agent not in registry:
+    if args.agent not in registry or not registry[args.agent]:
         print(f"Error: Agent '{args.agent}' not found in registry.")
         print("Available agents:", list(registry.keys()))
         sys.exit(1)
 
-    url = registry[args.agent]
+    import random
+    url = random.choice(registry[args.agent])
     payload = {
         "request_id": str(uuid.uuid4()),
         "query": args.query,
