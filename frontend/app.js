@@ -161,8 +161,11 @@ function updateHeroVisibility() {
 }
 
 function addUserMessage(text, attachment = null) {
-  const flowEl = document.getElementById('messages-flow');
+  if (state.chats[state.activeChatId]) {
+    state.chats[state.activeChatId].messages.push({ role: 'user', content: text, attachment });
+  }
   updateHeroVisibility();
+  const flowEl = document.getElementById('messages-flow');
 
   const bubbleRow = document.createElement('div');
   bubbleRow.className = 'chat-bubble-row user-msg';
@@ -198,8 +201,11 @@ function addUserMessage(text, attachment = null) {
 }
 
 function addAssistantResponse(answerText, executionDetails = null, sources = null) {
-  const flowEl = document.getElementById('messages-flow');
+  if (state.chats[state.activeChatId]) {
+    state.chats[state.activeChatId].messages.push({ role: 'assistant', content: answerText, executionDetails, sources });
+  }
   updateHeroVisibility();
+  const flowEl = document.getElementById('messages-flow');
 
   const bubbleRow = document.createElement('div');
   bubbleRow.className = 'chat-bubble-row assistant-msg';
