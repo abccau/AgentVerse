@@ -23,18 +23,19 @@ async def main():
     print("Checking network health...")
     
     checked_base_urls = set()
-    for agent, url in registry.items():
-        base_url = "/".join(url.split("/")[:-2])
-        if base_url in checked_base_urls:
-            continue
-        
-        checked_base_urls.add(base_url)
-        is_ok, result = await check_node(url)
-        
-        if is_ok:
-            print(f"[OK] {base_url} - Agents: {result.get('agents', [])}")
-        else:
-            print(f"[FAIL] {base_url} - Error: {result}")
+    for agent, urls in registry.items():
+        for url in urls:
+            base_url = "/".join(url.split("/")[:-2])
+            if base_url in checked_base_urls:
+                continue
+            
+            checked_base_urls.add(base_url)
+            is_ok, result = await check_node(url)
+            
+            if is_ok:
+                print(f"[OK] {base_url} - Agents: {result.get('agents', [])}")
+            else:
+                print(f"[FAIL] {base_url} - Error: {result}")
 
 if __name__ == "__main__":
     asyncio.run(main())

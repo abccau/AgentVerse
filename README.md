@@ -71,11 +71,11 @@ python run_node.py --role workers
 
 **Terminal 3 (Controller):**
 ```bash
-streamlit run controller/ui.py
+uvicorn controller.main:app --port 8501
 ```
 
 ### Step 4: Interact with the System
-1. Open your browser to the URL provided by Streamlit (typically `http://localhost:8501`).
+1. Open your browser to the URL provided by Uvicorn (typically `http://127.0.0.1:8501`).
 2. Use the **Mode** dropdown in the sidebar to route your request to a specific agent (e.g., Code, Research), or leave it on Auto.
 3. Type queries like "Write a python function" (will automatically route to Code) or "websearch the latest AI news" (will route to Tools).
 
