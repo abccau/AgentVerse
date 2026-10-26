@@ -4,6 +4,8 @@ import uuid
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 from common.http_client import call_agent
 from common.registry import get_registry
 
