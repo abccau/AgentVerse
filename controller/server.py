@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import uuid
+import json
 import asyncio
 from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, HTTPException, Request
@@ -33,11 +34,126 @@ app.add_middleware(
 )
 
 frontend_dir = os.path.join(BASE_DIR, "frontend")
+ADMIN_USERS_FILE = os.path.join(BASE_DIR, "config", "admin_users.json")
+
+def _load_admin_users():
+    if not os.path.exists(ADMIN_USERS_FILE):
+        default_users = [{
+            "username": "admin",
+            "password": "admin@123",
+            "name": "Primary Administrator",
+            "role": "SuperAdmin",
+            "created_at": "System Default",
+            "is_default": True
+        }]
+        os.makedirs(os.path.dirname(ADMIN_USERS_FILE), exist_ok=True)
+        with open(ADMIN_USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_users, f, indent=2)
+        return default_users
+    try:
+        with open(ADMIN_USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def _save_admin_users(users):
+    with open(ADMIN_USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(users, f, indent=2)
+
+class AdminLoginPayload(BaseModel):
+    username: str
+    password: str
+
+class AddAdminPayload(BaseModel):
+    username: str
+    password: str
+    name: Optional[str] = "Cluster Admin"
+    role: Optional[str] = "Administrator"
 
 class QueryPayload(BaseModel):
     query: str
     mode: Optional[str] = "Auto"
     context: Optional[dict] = None
+
+@app.post("/api/v1/auth/login")
+async def admin_login(payload: AdminLoginPayload):
+    users = _load_admin_users()
+    uname = payload.username.strip().lower()
+    for u in users:
+        if u.get("username", "").strip().lower() == uname and u.get("password") == payload.password:
+            return {
+                "status": "success",
+                "message": "Authentication successful",
+                "token": f"agentverse-admin-{uuid.uuid4().hex[:12]}",
+                "user": {
+                    "username": u.get("username"),
+                    "name": u.get("name", "Administrator"),
+                    "role": u.get("role", "SuperAdmin"),
+                    "created_at": u.get("created_at")
+                }
+            }
+    raise HTTPException(status_code=401, detail="Invalid username or password")
+
+@app.get("/api/v1/auth/admins")
+async def list_admin_users():
+    users = _load_admin_users()
+    sanitized = []
+    for u in users:
+        sanitized.append({
+            "username": u.get("username"),
+            "name": u.get("name", "Administrator"),
+            "role": u.get("role", "Administrator"),
+            "created_at": u.get("created_at", "Unknown"),
+            "is_default": u.get("is_default", False)
+        })
+    return {"status": "success", "admins": sanitized}
+
+@app.post("/api/v1/auth/admins")
+async def add_admin_user(payload: AddAdminPayload):
+    users = _load_admin_users()
+    uname = payload.username.strip().lower()
+    if not uname:
+        raise HTTPException(status_code=400, detail="Username cannot be empty")
+    if not payload.password or len(payload.password) < 4:
+        raise HTTPException(status_code=400, detail="Password must be at least 4 characters")
+    for u in users:
+        if u.get("username", "").strip().lower() == uname:
+            raise HTTPException(status_code=400, detail=f"Admin with username '{uname}' already exists")
+    
+    new_admin = {
+        "username": payload.username.strip(),
+        "password": payload.password,
+        "name": payload.name or "Cluster Admin",
+        "role": payload.role or "Administrator",
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "is_default": False
+    }
+    users.append(new_admin)
+    _save_admin_users(users)
+    return {
+        "status": "success",
+        "message": f"Admin '{payload.username}' access granted",
+        "admin": {
+            "username": new_admin["username"],
+            "name": new_admin["name"],
+            "role": new_admin["role"],
+            "created_at": new_admin["created_at"]
+        }
+    }
+
+@app.delete("/api/v1/auth/admins/{username}")
+async def delete_admin_user(username: str):
+    users = _load_admin_users()
+    uname = username.strip().lower()
+    if uname == "admin":
+        raise HTTPException(status_code=400, detail="Primary system administrator 'admin' cannot be removed")
+    initial_len = len(users)
+    users = [u for u in users if u.get("username", "").strip().lower() != uname]
+    if len(users) == initial_len:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+    _save_admin_users(users)
+    return {"status": "success", "message": f"Admin '{username}' access revoked"}
+
 
 @app.get("/api/v1/cluster")
 async def get_cluster_status():
