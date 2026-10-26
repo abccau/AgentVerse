@@ -353,11 +353,17 @@ async def execute_query(payload: QueryPayload):
         "message": f"Successfully processed by {effective_agent} on {assigned_pc}"
     }
 
+NO_CACHE_HEADERS = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
+}
+
 @app.get("/")
 async def serve_index():
     index_file = os.path.join(frontend_dir, "index.html")
     if os.path.exists(index_file):
-        return FileResponse(index_file, media_type="text/html")
+        return FileResponse(index_file, media_type="text/html", headers=NO_CACHE_HEADERS)
     return {"message": "Frontend index.html not found"}
 
 @app.get("/{filename:path}")
@@ -379,14 +385,14 @@ async def serve_static_files(filename: str):
             media_type = "image/png"
         elif clean_name.endswith(".html"):
             media_type = "text/html"
-        return FileResponse(file_path, media_type=media_type)
+        return FileResponse(file_path, media_type=media_type, headers=NO_CACHE_HEADERS)
         
     if any(clean_name.endswith(ext) for ext in [".css", ".js", ".png", ".jpg", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".map"]):
         raise HTTPException(status_code=404, detail=f"Static file '{clean_name}' not found")
         
     index_file = os.path.join(frontend_dir, "index.html")
     if os.path.exists(index_file):
-        return FileResponse(index_file, media_type="text/html")
+        return FileResponse(index_file, media_type="text/html", headers=NO_CACHE_HEADERS)
     raise HTTPException(status_code=404, detail="File not found")
 
 if __name__ == "__main__":
