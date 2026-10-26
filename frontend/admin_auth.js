@@ -1,5 +1,6 @@
 /**
  * AgentVerse - Enterprise Administrator Authentication & Access Management
+ * 
  * Ensures only authorized administrators with verified credentials can switch
  * to the Admin role, and allows active administrators to grant or revoke access.
  */
@@ -264,7 +265,7 @@
                   type="text" 
                   id="avAuthUsername" 
                   class="av-auth-input" 
-                  placeholder="admin" 
+                  placeholder="Enter admin username" 
                   value="admin"
                   required 
                   autofocus
@@ -285,7 +286,7 @@
                   type="password" 
                   id="avAuthPassword" 
                   class="av-auth-input" 
-                  placeholder="••••••••" 
+                  placeholder="Enter administrator password" 
                   required 
                 />
                 <button type="button" class="av-auth-eye-btn" id="avAuthTogglePassword" title="Show/Hide Password">
@@ -299,12 +300,11 @@
 
             <div class="av-auth-notice">
               <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 1px;">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
               </svg>
               <div>
-                <strong>Default Administrator Access:</strong><br/>
-                Username: <code style="background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px;">admin</code> &nbsp;|&nbsp;
-                Password: <code style="background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px;">admin@123</code>
+                <strong>Enterprise Security Clearance:</strong><br/>
+                Authorized personnel only. Access attempts are authenticated and auditable.
               </div>
             </div>
 
@@ -549,104 +549,74 @@
           </button>
         </div>
 
-        <div class="av-auth-body" style="flex: 1;">
-          <!-- List View -->
+        <div class="av-mgmt-content">
+          <!-- List Panel -->
           <div id="avMgmtListPanel">
-            <div id="avAdminsLoading" style="text-align: center; padding: 2rem 0; color: #94a3b8; font-size: 0.8125rem;">
-              <div class="av-auth-spinner" style="margin: 0 auto 0.75rem auto;"></div>
-              Loading authorized administrator records...
+            <div id="avAdminsLoading" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">
+              <div class="av-auth-spinner" style="margin: 0 auto 0.75rem;"></div>
+              Loading authorized administrators...
             </div>
             <div class="av-admins-list" id="avAdminsListContainer" style="display: none;"></div>
           </div>
 
-          <!-- Add View -->
+          <!-- Add Panel -->
           <div id="avMgmtAddPanel" style="display: none;">
             <div id="avAddAdminAlert" style="display: none;"></div>
 
             <form id="avAddAdminForm">
-              <div class="av-add-admin-grid">
-                <div class="av-auth-field">
-                  <label class="av-auth-label" for="avNewAdminUsername">
-                    <span>New Username</span>
-                    <span style="font-size: 0.65rem; color: #a855f7;">REQUIRED</span>
-                  </label>
-                  <div class="av-auth-input-wrapper">
-                    <svg class="av-auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <input 
-                      type="text" 
-                      id="avNewAdminUsername" 
-                      class="av-auth-input" 
-                      placeholder="e.g. devops_admin" 
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div class="av-auth-field">
-                  <label class="av-auth-label" for="avNewAdminName">
-                    <span>Full Name / Title</span>
-                  </label>
-                  <div class="av-auth-input-wrapper">
-                    <svg class="av-auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <input 
-                      type="text" 
-                      id="avNewAdminName" 
-                      class="av-auth-input" 
-                      placeholder="e.g. Operations Lead" 
-                    />
-                  </div>
-                </div>
+              <div class="av-auth-field">
+                <label class="av-auth-label" for="avNewAdminUsername">
+                  <span>Username</span>
+                  <span style="font-size: 0.65rem; color: #a855f7; font-family: monospace;">UNIQUE ID</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="avNewAdminUsername" 
+                  class="av-auth-input" 
+                  style="padding-left: 1rem;" 
+                  placeholder="e.g. sarah_ops" 
+                  required
+                />
               </div>
 
-              <div class="av-add-admin-grid">
-                <div class="av-auth-field">
-                  <label class="av-auth-label" for="avNewAdminPassword">
-                    <span>Password</span>
-                    <span style="font-size: 0.65rem; color: #a855f7;">MIN 4 CHARS</span>
-                  </label>
-                  <div class="av-auth-input-wrapper">
-                    <svg class="av-auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                    <input 
-                      type="password" 
-                      id="avNewAdminPassword" 
-                      class="av-auth-input" 
-                      placeholder="••••••••" 
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div class="av-auth-field">
-                  <label class="av-auth-label" for="avNewAdminRole">
-                    <span>Privilege Level</span>
-                  </label>
-                  <div class="av-auth-input-wrapper">
-                    <svg class="av-auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <input 
-                      type="text" 
-                      id="avNewAdminRole" 
-                      class="av-auth-input" 
-                      value="Cluster Administrator" 
-                    />
-                  </div>
-                </div>
+              <div class="av-auth-field">
+                <label class="av-auth-label" for="avNewAdminName">
+                  <span>Full Name / Designation</span>
+                  <span style="font-size: 0.65rem; color: #64748b; font-family: monospace;">OPTIONAL</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="avNewAdminName" 
+                  class="av-auth-input" 
+                  style="padding-left: 1rem;" 
+                  placeholder="e.g. Sarah Connor" 
+                />
               </div>
 
-              <div class="av-auth-notice" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 1px;">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>
-                  Granting administrator access will allow this user to authenticate on the Admin Login portal and operate distributed worker cluster nodes.
-                </span>
+              <div class="av-auth-field">
+                <label class="av-auth-label" for="avNewAdminPassword">
+                  <span>Password</span>
+                  <span style="font-size: 0.65rem; color: #a855f7; font-family: monospace;">MIN 4 CHARS</span>
+                </label>
+                <input 
+                  type="password" 
+                  id="avNewAdminPassword" 
+                  class="av-auth-input" 
+                  style="padding-left: 1rem;" 
+                  placeholder="Enter secure password" 
+                  required
+                />
+              </div>
+
+              <div class="av-auth-field">
+                <label class="av-auth-label" for="avNewAdminRole">
+                  <span>Administrative Role</span>
+                </label>
+                <select id="avNewAdminRole" class="av-auth-input" style="padding-left: 1rem; background-color: #0f172a;">
+                  <option value="Administrator">Administrator (Full Access)</option>
+                  <option value="SecOps Lead">SecOps Lead (Security & Topology)</option>
+                  <option value="Cluster Engineer">Cluster Engineer (Diagnostics & Traces)</option>
+                </select>
               </div>
 
               <div class="av-auth-actions">

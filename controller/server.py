@@ -154,7 +154,6 @@ async def delete_admin_user(username: str):
     _save_admin_users(users)
     return {"status": "success", "message": f"Admin '{username}' access revoked"}
 
-
 @app.get("/api/v1/cluster")
 async def get_cluster_status():
     """Returns cluster health across physical and local nodes."""
