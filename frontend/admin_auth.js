@@ -1,8 +1,10 @@
 /**
  * AgentVerse - Enterprise Administrator Authentication & Access Management
  * 
- * Ensures only authorized administrators with verified credentials can switch
- * to the Admin role, and allows active administrators to grant or revoke access.
+ * Ensures complete separation of the Employee and Administrator portals.
+ * - Employee portal strictly contains ZERO admin buttons or restricted links.
+ * - Administrator portal is guarded by password authentication (admin / admin@123).
+ * - Administrator Access Control modal provides reliable Back and Close buttons.
  */
 
 (function () {
@@ -19,10 +21,6 @@
   const SESSION_KEY = 'agentverse_admin_session';
   const CACHE_KEY = 'agentverse_cached_admins';
 
-  // State
-  let pendingAction = null;
-  let isBypassingAuth = false;
-
   // --- Session Helpers ---
   function getAdminSession() {
     try {
@@ -37,6 +35,7 @@
     try {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
       window.AgentVerseCurrentAdmin = user;
+      document.body.setAttribute('data-portal-role', 'admin');
     } catch (e) {
       console.error('[AdminAuth] Error saving session:', e);
     }
@@ -46,6 +45,8 @@
     try {
       sessionStorage.removeItem(SESSION_KEY);
       window.AgentVerseCurrentAdmin = null;
+      document.body.setAttribute('data-portal-role', 'employee');
+      updateAdminManagementPills();
     } catch (e) {
       console.error('[AdminAuth] Error clearing session:', e);
     }
@@ -87,7 +88,6 @@
       return { success: false, message: err.detail || 'Invalid username or password' };
     } catch (e) {
       console.warn('[AdminAuth] Server unreachable, checking local credentials fallback:', e);
-      // Fallback verification
       const admins = getCachedAdmins();
       const match = admins.find(a => 
         a.username.toLowerCase() === username.trim().toLowerCase() && 
@@ -138,7 +138,6 @@
       const err = await res.json().catch(() => ({}));
       return { success: false, message: err.detail || 'Failed to add admin' };
     } catch (e) {
-      // Local fallback save
       const admins = getCachedAdmins();
       if (admins.some(a => a.username.toLowerCase() === newAdminData.username.trim().toLowerCase())) {
         return { success: false, message: `Admin '${newAdminData.username}' already exists` };
@@ -211,10 +210,7 @@
   }
 
   // --- Admin Login Modal ---
-  function openAdminLoginModal(actionContext = null) {
-    pendingAction = actionContext;
-
-    // Remove any open modal
+  function openAdminLoginModal(options = {}) {
     closeAdminLoginModal();
 
     const overlay = document.createElement('div');
@@ -226,16 +222,24 @@
         <div class="av-auth-glow-orb"></div>
         <div class="av-auth-glow-orb-secondary"></div>
         
-        <button class="av-auth-close-btn" id="avAuthCloseBtn" title="Close & Cancel">
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-
         <div class="av-auth-header">
+          <div class="av-modal-top-bar">
+            <button class="av-modal-back-btn" id="avAuthBackBtn" type="button" title="Back to Home Portal">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              <span>Back to Portal</span>
+            </button>
+            <button class="av-auth-close-btn" id="avAuthCloseBtn" type="button" title="Close Modal">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
           <div class="av-auth-badge">
             <span class="av-auth-pulse-dot"></span>
-            <span>Restricted Access Control</span>
+            <span>Administrator Access Control</span>
           </div>
           <h2 class="av-auth-title" id="avAuthTitle">
             <svg width="22" height="22" fill="none" stroke="#c084fc" viewBox="0 0 24 24">
@@ -244,7 +248,7 @@
             Administrator Login
           </h2>
           <p class="av-auth-subtitle">
-            Enter authorized administrator credentials to unlock multi-node cluster topology and mission control.
+            Please authenticate with authorized credentials to enter the Cluster Mission Control room.
           </p>
         </div>
 
@@ -304,7 +308,7 @@
               </svg>
               <div>
                 <strong>Enterprise Security Clearance:</strong><br/>
-                Authorized personnel only. Access attempts are authenticated and auditable.
+                Authorized administrators only. Access attempts are authenticated and auditable.
               </div>
             </div>
 
@@ -317,7 +321,7 @@
               </button>
 
               <button type="button" class="av-auth-cancel-btn" id="avAuthCancelBtn">
-                Stay as Employee
+                Cancel & Return
               </button>
             </div>
           </form>
@@ -334,8 +338,8 @@
 
     document.body.appendChild(overlay);
 
-    // Event Bindings
     const closeBtn = overlay.querySelector('#avAuthCloseBtn');
+    const backBtn = overlay.querySelector('#avAuthBackBtn');
     const cancelBtn = overlay.querySelector('#avAuthCancelBtn');
     const form = overlay.querySelector('#avAdminLoginForm');
     const toggleEye = overlay.querySelector('#avAuthTogglePassword');
@@ -348,24 +352,26 @@
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 0.2s ease';
       setTimeout(() => overlay.remove(), 200);
-      pendingAction = null;
     }
 
-    closeBtn.addEventListener('click', close);
-    cancelBtn.addEventListener('click', close);
-    overlay.addEventListener('click', (e) => {
+    if (closeBtn) closeBtn.onclick = close;
+    if (backBtn) backBtn.onclick = close;
+    if (cancelBtn) cancelBtn.onclick = close;
+    overlay.onclick = (e) => {
       if (e.target === overlay) close();
-    });
+    };
 
-    toggleEye.addEventListener('click', () => {
-      const isPwd = pwdInput.type === 'password';
-      pwdInput.type = isPwd ? 'text' : 'password';
-      toggleEye.innerHTML = isPwd
-        ? `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
-        : `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
-    });
+    if (toggleEye) {
+      toggleEye.onclick = () => {
+        const isPwd = pwdInput.type === 'password';
+        pwdInput.type = isPwd ? 'text' : 'password';
+        toggleEye.innerHTML = isPwd
+          ? `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
+          : `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
+      };
+    }
 
-    form.addEventListener('submit', async (e) => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
       const u = usernameInput.value.trim();
       const p = pwdInput.value;
@@ -393,8 +399,11 @@
 
         setTimeout(() => {
           overlay.remove();
-          executeRoleSwitchToAdmin();
-        }, 500);
+          if (options.onSuccess && typeof options.onSuccess === 'function') {
+            options.onSuccess(result.user);
+          }
+          updateAdminManagementPills();
+        }, 400);
       } else {
         submitBtn.disabled = false;
         submitBtn.innerHTML = `
@@ -415,7 +424,7 @@
         pwdInput.focus();
         pwdInput.select();
       }
-    });
+    };
 
     setTimeout(() => {
       if (usernameInput.value) {
@@ -431,74 +440,7 @@
     if (existing) existing.remove();
   }
 
-  // --- Trigger Admin Role in React App ---
-  function executeRoleSwitchToAdmin() {
-    isBypassingAuth = true;
-
-    // 1. If we captured a specific trigger element, click it with bypass
-    if (pendingAction && pendingAction.triggerElem) {
-      try {
-        pendingAction.triggerElem.click();
-      } catch (err) {
-        console.warn('[AdminAuth] Trigger element click failed:', err);
-      }
-    } else {
-      // 2. Otherwise look for the Administrator button in the UI
-      triggerAdminButtonInDOM();
-    }
-
-    setTimeout(() => {
-      isBypassingAuth = false;
-      pendingAction = null;
-      updateAdminManagementPills();
-    }, 400);
-  }
-
-  function triggerAdminButtonInDOM() {
-    // Check if on Landing page: "Enter as Administrator"
-    const landingAdminCards = Array.from(document.querySelectorAll('div, button, a')).filter(el => {
-      const txt = (el.innerText || el.textContent || '').trim();
-      return (txt.includes('Enter as Administrator') || txt.includes('Enter Control Room')) && !el.closest('#avAdminLoginCard');
-    });
-
-    if (landingAdminCards.length > 0) {
-      const card = landingAdminCards[landingAdminCards.length - 1];
-      card.click();
-      return;
-    }
-
-    // Check if dropdown Administrator button is already open
-    const adminButtons = Array.from(document.querySelectorAll('button')).filter(b => {
-      const txt = (b.innerText || b.textContent || '').trim();
-      return txt.includes('Administrator') && (txt.includes('Topology') || txt.includes('Traffic'));
-    });
-
-    if (adminButtons.length > 0) {
-      adminButtons[0].click();
-      return;
-    }
-
-    // Try opening the Operator profile menu first
-    const operatorBtn = Array.from(document.querySelectorAll('button')).find(b => {
-      const txt = (b.innerText || b.textContent || '').trim();
-      return txt.includes('Operator') && !b.closest('.av-auth-card');
-    });
-
-    if (operatorBtn) {
-      operatorBtn.click();
-      setTimeout(() => {
-        const openedAdminBtn = Array.from(document.querySelectorAll('button')).find(b => {
-          const txt = (b.innerText || b.textContent || '').trim();
-          return txt.includes('Administrator') && txt.includes('Topology');
-        });
-        if (openedAdminBtn) {
-          openedAdminBtn.click();
-        }
-      }, 100);
-    }
-  }
-
-  // --- Admin Access Management Modal ---
+  // --- Admin Access Management Modal with Bulletproof Back/Close Buttons ---
   async function openAdminManagementModal() {
     closeAdminManagementModal();
 
@@ -507,17 +449,25 @@
     overlay.id = 'avAdminMgmtOverlay';
 
     overlay.innerHTML = `
-      <div class="av-auth-card av-admin-mgmt-card" role="dialog" aria-modal="true">
+      <div class="av-auth-card av-admin-mgmt-card" id="avAdminMgmtCard" role="dialog" aria-modal="true">
         <div class="av-auth-glow-orb"></div>
         <div class="av-auth-glow-orb-secondary"></div>
         
-        <button class="av-auth-close-btn" id="avMgmtCloseBtn" title="Close">
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-
         <div class="av-auth-header">
+          <div class="av-modal-top-bar">
+            <button class="av-modal-back-btn" id="avMgmtBackBtn" type="button" title="Back to Mission Control">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              <span>Back to Mission Control</span>
+            </button>
+            <button class="av-auth-close-btn" id="avMgmtCloseBtn" type="button" title="Close Panel">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
           <div class="av-auth-badge">
             <span class="av-auth-pulse-dot"></span>
             <span>Security Subsystem</span>
@@ -534,14 +484,14 @@
         </div>
 
         <div class="av-mgmt-tabs">
-          <button class="av-mgmt-tab-btn active" id="avTabListBtn">
+          <button class="av-mgmt-tab-btn active" id="avTabListBtn" type="button">
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <span>Authorized Admins</span>
-            <span id="avAdminCountBadge" style="background: rgba(168,85,247,0.2); padding: 1px 6px; border-radius: 99px; font-size: 0.65rem; color: #d8b4fe;">...</span>
+            <span id="avAdminCountBadge" style="background: rgba(168,85,247,0.2); padding: 1px 6px; border-radius: 99px; font-size: 0.65rem; color: #d8b4fe;">1</span>
           </button>
-          <button class="av-mgmt-tab-btn" id="avTabAddBtn">
+          <button class="av-mgmt-tab-btn" id="avTabAddBtn" type="button">
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
@@ -630,12 +580,23 @@
             </form>
           </div>
         </div>
+
+        <div class="av-mgmt-footer">
+          <button class="av-modal-done-btn" id="avMgmtDoneBtn" type="button">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Back to Mission Control</span>
+          </button>
+        </div>
       </div>
     `;
 
     document.body.appendChild(overlay);
 
     const closeBtn = overlay.querySelector('#avMgmtCloseBtn');
+    const backBtn = overlay.querySelector('#avMgmtBackBtn');
+    const doneBtn = overlay.querySelector('#avMgmtDoneBtn');
     const tabListBtn = overlay.querySelector('#avTabListBtn');
     const tabAddBtn = overlay.querySelector('#avTabAddBtn');
     const listPanel = overlay.querySelector('#avMgmtListPanel');
@@ -652,38 +613,48 @@
       setTimeout(() => overlay.remove(), 200);
     }
 
-    closeBtn.addEventListener('click', close);
-    overlay.addEventListener('click', (e) => {
+    if (closeBtn) closeBtn.onclick = close;
+    if (backBtn) backBtn.onclick = close;
+    if (doneBtn) doneBtn.onclick = close;
+
+    overlay.onclick = (e) => {
       if (e.target === overlay) close();
-    });
+    };
 
     // Tab switching
-    tabListBtn.addEventListener('click', () => {
-      tabListBtn.classList.add('active');
-      tabAddBtn.classList.remove('active');
-      listPanel.style.display = 'block';
-      addPanel.style.display = 'none';
-      loadAdmins();
-    });
+    if (tabListBtn) {
+      tabListBtn.onclick = () => {
+        tabListBtn.classList.add('active');
+        tabAddBtn.classList.remove('active');
+        listPanel.style.display = 'block';
+        addPanel.style.display = 'none';
+        loadAdmins();
+      };
+    }
 
-    tabAddBtn.addEventListener('click', () => {
-      tabAddBtn.classList.add('active');
-      tabListBtn.classList.remove('active');
-      listPanel.style.display = 'none';
-      addPanel.style.display = 'block';
-      overlay.querySelector('#avNewAdminUsername').focus();
-    });
+    if (tabAddBtn) {
+      tabAddBtn.onclick = () => {
+        tabAddBtn.classList.add('active');
+        tabListBtn.classList.remove('active');
+        listPanel.style.display = 'none';
+        addPanel.style.display = 'block';
+        const userInp = overlay.querySelector('#avNewAdminUsername');
+        if (userInp) userInp.focus();
+      };
+    }
 
     // Load admin list
     async function loadAdmins() {
-      loadingElem.style.display = 'block';
-      listContainer.style.display = 'none';
+      if (loadingElem) loadingElem.style.display = 'block';
+      if (listContainer) listContainer.style.display = 'none';
 
       const admins = await apiFetchAdmins();
-      countBadge.textContent = admins.length;
-      loadingElem.style.display = 'none';
-      listContainer.style.display = 'flex';
-      listContainer.innerHTML = '';
+      if (countBadge) countBadge.textContent = admins.length;
+      if (loadingElem) loadingElem.style.display = 'none';
+      if (listContainer) {
+        listContainer.style.display = 'flex';
+        listContainer.innerHTML = '';
+      }
 
       admins.forEach(admin => {
         const isMaster = admin.username.toLowerCase() === 'admin' || admin.is_default;
@@ -707,103 +678,121 @@
           <div>
             ${isMaster 
               ? `<span style="font-size: 0.7rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace; padding: 0.35rem 0.6rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.08);">Protected</span>`
-              : `<button class="av-revoke-btn" data-username="${escapeHtml(admin.username)}">Revoke Access</button>`
+              : `<button class="av-revoke-btn" data-username="${escapeHtml(admin.username)}" type="button">Revoke Access</button>`
             }
           </div>
         `;
 
         if (!isMaster) {
           const revokeBtn = item.querySelector('.av-revoke-btn');
-          revokeBtn.addEventListener('click', async () => {
-            if (confirm(`Are you sure you want to revoke administrator access for '${admin.username}'?`)) {
-              revokeBtn.disabled = true;
-              revokeBtn.textContent = 'Revoking...';
-              const res = await apiDeleteAdmin(admin.username);
-              if (res.success) {
-                showToast(`Administrator '${admin.username}' revoked successfully.`, 'info');
-                loadAdmins();
-              } else {
-                alert(res.message || 'Failed to revoke admin');
-                revokeBtn.disabled = false;
-                revokeBtn.textContent = 'Revoke Access';
+          if (revokeBtn) {
+            revokeBtn.onclick = async () => {
+              if (confirm(`Are you sure you want to revoke administrator access for '${admin.username}'?`)) {
+                revokeBtn.disabled = true;
+                revokeBtn.textContent = 'Revoking...';
+                const res = await apiDeleteAdmin(admin.username);
+                if (res.success) {
+                  showToast(`Administrator '${admin.username}' revoked successfully.`, 'info');
+                  loadAdmins();
+                } else {
+                  alert(res.message || 'Failed to revoke admin');
+                  revokeBtn.disabled = false;
+                  revokeBtn.textContent = 'Revoke Access';
+                }
               }
-            }
-          });
+            };
+          }
         }
 
-        listContainer.appendChild(item);
+        if (listContainer) listContainer.appendChild(item);
       });
     }
 
     // Add admin submission
-    addForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const u = overlay.querySelector('#avNewAdminUsername').value.trim();
-      const n = overlay.querySelector('#avNewAdminName').value.trim() || 'Cluster Administrator';
-      const p = overlay.querySelector('#avNewAdminPassword').value;
-      const r = overlay.querySelector('#avNewAdminRole').value.trim() || 'Administrator';
+    if (addForm) {
+      addForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const u = overlay.querySelector('#avNewAdminUsername').value.trim();
+        const n = overlay.querySelector('#avNewAdminName').value.trim() || 'Cluster Administrator';
+        const p = overlay.querySelector('#avNewAdminPassword').value;
+        const r = overlay.querySelector('#avNewAdminRole').value.trim() || 'Administrator';
 
-      const submitBtn = overlay.querySelector('#avCreateAdminSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <div class="av-auth-spinner"></div>
-        <span>Provisioning Access...</span>
-      `;
+        const submitBtn = overlay.querySelector('#avCreateAdminSubmitBtn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `
+            <div class="av-auth-spinner"></div>
+            <span>Provisioning Access...</span>
+          `;
+        }
 
-      const result = await apiAddAdmin({ username: u, password: p, name: n, role: r });
+        const result = await apiAddAdmin({ username: u, password: p, name: n, role: r });
 
-      if (result.success) {
-        showToast(`✓ Admin access granted for '@${u}'!`, 'success');
-        addForm.reset();
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          <span>Grant Administrator Access</span>
-        `;
-        // Switch back to list tab
-        tabListBtn.click();
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          <span>Grant Administrator Access</span>
-        `;
-        alertBox.innerHTML = `
-          <div class="av-auth-error">
-            <svg class="av-auth-error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>${escapeHtml(result.message)}</span>
-          </div>
-        `;
-        alertBox.style.display = 'block';
-      }
-    });
+        if (result.success) {
+          showToast(`✓ Admin access granted for '@${u}'!`, 'success');
+          addForm.reset();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Grant Administrator Access</span>
+            `;
+          }
+          if (tabListBtn) tabListBtn.click();
+        } else {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Grant Administrator Access</span>
+            `;
+          }
+          if (alertBox) {
+            alertBox.innerHTML = `
+              <div class="av-auth-error">
+                <svg class="av-auth-error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>${escapeHtml(result.message)}</span>
+              </div>
+            `;
+            alertBox.style.display = 'block';
+          }
+        }
+      };
+    }
 
     loadAdmins();
   }
 
   function closeAdminManagementModal() {
     const existing = document.getElementById('avAdminMgmtOverlay');
-    if (existing) existing.remove();
+    if (existing) {
+      existing.style.opacity = '0';
+      existing.style.transition = 'opacity 0.2s ease';
+      setTimeout(() => existing.remove(), 200);
+    }
   }
 
-  // --- Dynamic UI Badges & Buttons ---
+  // --- Dynamic UI Badges & Buttons for Admin Only ---
   function updateAdminManagementPills() {
-    const isNowAdmin = isCurrentRoleAdmin();
+    const isAdmin = isCurrentRoleAdmin();
 
-    // 1. In header: add "Admin Access Control" button if admin
+    // Set body role attribute
+    document.body.setAttribute('data-portal-role', isAdmin ? 'admin' : 'employee');
+
     const headerRight = document.querySelector('header .relative') || document.querySelector('header');
     let mgmtPill = document.getElementById('avHeaderAdminMgmtPill');
 
-    if (isNowAdmin) {
+    if (isAdmin && isAdminLoggedIn()) {
       if (!mgmtPill && headerRight) {
         mgmtPill = document.createElement('button');
         mgmtPill.id = 'avHeaderAdminMgmtPill';
+        mgmtPill.type = 'button';
         mgmtPill.className = 'av-header-admin-mgmt-pill';
         mgmtPill.title = 'Manage Authorized Administrators';
         mgmtPill.innerHTML = `
@@ -812,11 +801,10 @@
           </svg>
           <span>Admin Access Control</span>
         `;
-        mgmtPill.addEventListener('click', (e) => {
+        mgmtPill.onclick = (e) => {
           e.stopPropagation();
           openAdminManagementModal();
-        });
-        // Insert right before the Operator profile button
+        };
         headerRight.parentNode.insertBefore(mgmtPill, headerRight);
       }
     } else {
@@ -825,7 +813,6 @@
   }
 
   function isCurrentRoleAdmin() {
-    // Check Operator badge text in header
     const operatorBadges = Array.from(document.querySelectorAll('header span, nav span')).filter(s => {
       const txt = (s.innerText || s.textContent || '').trim().toLowerCase();
       return txt === 'admin';
@@ -833,83 +820,23 @@
     return operatorBadges.length > 0;
   }
 
-  // --- Global Capture-Phase Click Interceptor ---
-  function initRoleSwitchInterceptor() {
-    document.addEventListener('click', function (e) {
-      if (isBypassingAuth) return;
+  // Global keyboard listener (Escape closes modals)
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeAdminManagementModal();
+      closeAdminLoginModal();
+    }
+  });
 
-      const target = e.target;
-      if (!target) return;
-
-      // 1. Did the user click "Employee" to switch back from admin?
-      const employeeSwitchBtn = target.closest('button');
-      if (employeeSwitchBtn) {
-        const btnText = (employeeSwitchBtn.innerText || employeeSwitchBtn.textContent || '').trim();
-        if (btnText.includes('Employee') && btnText.includes('Chat & Knowledge')) {
-          // User is switching back to employee!
-          if (isAdminLoggedIn()) {
-            clearAdminSession();
-            showToast('Switched to Employee mode. Administrator session locked.', 'info');
-            setTimeout(updateAdminManagementPills, 300);
-          }
-          return; // Let click proceed to React to switch to employee
-        }
-      }
-
-      // 2. Did the user click to switch to "Administrator"?
-      const clickable = target.closest('button, [role="button"], a, div');
-      if (!clickable) return;
-
-      const text = (clickable.innerText || clickable.textContent || '').trim();
-
-      // Case A: Operator dropdown "Administrator" button
-      const isDropdownAdminBtn = clickable.tagName === 'BUTTON' && 
-                                text.includes('Administrator') && 
-                                (text.includes('Topology') || text.includes('Traffic') || text.includes('Traces'));
-
-      // Case B: Landing page "Enter as Administrator" / "Enter Control Room"
-      const isLandingAdminCard = (text.includes('Enter as Administrator') || text.includes('Enter Control Room')) && 
-                                !clickable.closest('.av-auth-card');
-
-      // Case C: Restricted modal "Simulate Admin & Proceed"
-      const isSimulateAdminBtn = text.includes('Simulate Admin & Proceed') && !clickable.closest('.av-auth-card');
-
-      // Case D: Restricted Admin Sidebar buttons when in Employee role
-      let isRestrictedSidebarBtn = false;
-      const sidebarContainer = clickable.closest('aside');
-      if (sidebarContainer) {
-        const isRestrictedSection = clickable.closest('div')?.previousElementSibling?.textContent?.includes('Admin Control Room') ||
-                                   clickable.textContent.includes('Mission Control') ||
-                                   clickable.textContent.includes('Cluster Topology') ||
-                                   clickable.textContent.includes('Traffic Explorer') ||
-                                   clickable.textContent.includes('Trace Waterfall');
-        if (isRestrictedSection && !isCurrentRoleAdmin()) {
-          isRestrictedSidebarBtn = true;
-        }
-      }
-
-      if (isDropdownAdminBtn || isLandingAdminCard || isSimulateAdminBtn || isRestrictedSidebarBtn) {
-        if (!isAdminLoggedIn()) {
-          // STOP React from switching roles immediately!
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-
-          // If restricted modal is open, close it
-          const restrictedModalClose = document.querySelector('div.fixed.inset-0.z-50 button');
-          if (restrictedModalClose && isSimulateAdminBtn) {
-            restrictedModalClose.click();
-          }
-
-          // Open the Admin Login Modal
-          openAdminLoginModal({
-            triggerElem: clickable,
-            type: isDropdownAdminBtn ? 'dropdown' : (isLandingAdminCard ? 'landing' : 'sidebar')
-          });
-        }
-      }
-    }, true); // Important: capture phase to execute before React synthetic events!
-  }
+  // Global delegated click listener for modal close/back buttons
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#avMgmtCloseBtn') || e.target.closest('#avMgmtBackBtn') || e.target.closest('#avMgmtDoneBtn')) {
+      closeAdminManagementModal();
+    }
+    if (e.target.closest('#avAuthCloseBtn') || e.target.closest('#avAuthBackBtn') || e.target.closest('#avAuthCancelBtn')) {
+      closeAdminLoginModal();
+    }
+  });
 
   // --- Initial check & DOM Observer ---
   function initObserver() {
@@ -929,14 +856,11 @@
     getSession: getAdminSession
   };
 
-  // Start interceptor
-  initRoleSwitchInterceptor();
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initObserver);
   } else {
     initObserver();
   }
 
-  console.log('[AgentVerse] Admin Authentication & Access Control Subsystem initialized.');
+  console.log('[AgentVerse] Admin Authentication & Strict Separation Subsystem initialized.');
 })();
