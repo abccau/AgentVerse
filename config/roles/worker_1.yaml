@@ -5,4 +5,4 @@ agents:
   - name: coding
     expose: true
     handler: "nodes.coding.coding_agent:handle"
-    model: "qwen2.5-coder:7b"
+    model: "qwen2.5:1.5b" 
