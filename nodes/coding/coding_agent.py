@@ -35,6 +35,7 @@ def get_coding_solution(query: str) -> str:
             "#### Key Takeaways\n"
             "1. By calculating `complement = target - num` at each step, we avoid a quadratic $O(N^2)$ brute force double loop.\n"
             "2. Handled via **Laptop 3 (Worker 1 - Coding Agent)** cluster node."
+        )
     elif "palindrome" in q:
         return (
             "### Solution: Palindrome Verification (Python)\n\n"

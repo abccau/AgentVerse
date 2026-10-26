@@ -490,14 +490,13 @@
   backdrop-filter: blur(12px);
   white-space: nowrap;
   text-decoration: none;
-  cursor: pointer;
+  cursor: default;
   margin-bottom: 32px;
   transition: all .2s ease;
 }
 .av-hero-pill:hover {
-  background: rgba(99, 102, 241, 0.22);
-  border-color: rgba(99, 102, 241, 0.5);
-  transform: translateY(-1px);
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 .av-hero-sparkle {
   color: #818cf8;
@@ -867,20 +866,6 @@
   transform: translateY(-1px);
 }
 
-/* FOOTER BAR */
-.av-home-footer {
-  width: 100%;
-  max-width: 1160px;
-  margin: 60px auto 40px auto;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
 /* Floating Return to Home Button - Permanently Hidden per user request */
 .av-nav-hero-return-btn {
   display: none !important;
@@ -939,219 +924,6 @@ div[role="dialog"]:has(h3:contains("Administrator Access Required")) {
 }
 
 
-/* Modal styles preserved */
-.av-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 99995;
-  background: rgba(4, 4, 8, .82);
-  backdrop-filter: blur(24px) saturate(160%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .32s cubic-bezier(.22, 1, .36, 1);
-  font-family: 'Inter', system-ui, sans-serif;
-}
-.av-modal[data-open="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-.av-window {
-  width: min(1200px, 94vw);
-  height: min(720px, 88vh);
-  border-radius: 16px;
-  background: rgba(12, 13, 19, .95);
-  border: 1px solid rgba(255, 255, 255, .16);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, .85);
-  display: grid;
-  grid-template-rows: 52px 1fr;
-  overflow: hidden;
-  transform: translateY(14px) scale(.98);
-  transition: transform .36s cubic-bezier(.18, .85, .26, 1);
-}
-.av-modal[data-open="true"] .av-window {
-  transform: none;
-}
-.av-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, .10);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
-}
-.av-identity {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-.av-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.av-btn {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: rgba(255, 255, 255, .06);
-  color: #fff;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all .2s;
-}
-.av-btn:hover {
-  background: rgba(255, 255, 255, .14);
-}
-
-.av-grid {
-  display: grid;
-  grid-template-columns: 1fr 480px;
-  overflow: hidden;
-}
-.av-graph-pane {
-  position: relative;
-  background: radial-gradient(circle at 50% 50%, rgba(95, 242, 194, .08), transparent 70%);
-  border-right: 1px solid rgba(255, 255, 255, .10);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.av-graph-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.av-graph-overlay {
-  position: absolute;
-  bottom: 16px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: rgba(255, 255, 255, .55);
-  pointer-events: none;
-}
-
-.av-chat-pane {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 18px;
-  gap: 14px;
-  background: rgba(8, 9, 14, .85);
-  overflow: hidden;
-}
-.av-chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.av-chip {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .12);
-  color: rgba(255, 255, 255, .8);
-  font-size: 11.5px;
-  font-family: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all .2s;
-}
-.av-chip:hover {
-  background: rgba(255, 255, 255, .16);
-  color: #fff;
-}
-
-.av-stream {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-.av-msg {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .04);
-  border: 1px solid rgba(255, 255, 255, .08);
-  font-size: 13px;
-  line-height: 1.5;
-}
-.av-msg-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.av-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.av-time {
-  font-size: 11px;
-  color: rgba(255, 255, 255, .40);
-}
-.av-body {
-  color: rgba(255, 255, 255, .90);
-}
-
-.av-input-bar {
-  display: flex;
-  align-items: center;
-  height: 46px;
-  padding: 4px 6px 4px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .07);
-  border: 1px solid rgba(255, 255, 255, .18);
-  gap: 10px;
-}
-.av-input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  color: #fff;
-  font-family: inherit;
-  font-size: 13.5px;
-  outline: none;
-  min-width: 0;
-}
-.av-send {
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 0;
-  background: #fff;
-  color: #000;
-  cursor: pointer;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .av-hero-bar { padding: 0 20px; }
@@ -1160,8 +932,6 @@ div[role="dialog"]:has(h3:contains("Administrator Access Required")) {
   .av-agent-cards-grid { grid-template-columns: 1fr; }
   .av-portals-grid { grid-template-columns: 1fr; }
   .av-cluster-hud-grid { grid-template-columns: repeat(2, 1fr); }
-  .av-grid { grid-template-columns: 1fr; }
-  .av-graph-pane { display: none; }
 }
 @media (max-width: 640px) {
   .av-hero-main h1 { font-size: 34px; }

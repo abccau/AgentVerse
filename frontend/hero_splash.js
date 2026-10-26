@@ -89,7 +89,6 @@
         <nav class="av-hero-links" aria-label="Primary">
           <a href="#overview" class="nav-scroll-link">Overview</a>
           <a href="#access-portals" class="nav-scroll-link">Access Portals</a>
-          <a href="#architecture" class="nav-scroll-link">Architecture</a>
           <a href="#specialized-agents" class="nav-scroll-link">Specialized Agents</a>
         </nav>
 
@@ -112,7 +111,6 @@
           <nav class="av-hero-sheet" id="menu-sheet" aria-label="Menu">
             <a href="#overview" class="nav-scroll-link">Overview</a>
             <a href="#access-portals" class="nav-scroll-link">Access Portals</a>
-            <a href="#architecture" class="nav-scroll-link">Architecture</a>
             <a href="#specialized-agents" class="nav-scroll-link">Specialized Agents</a>
             <button class="av-hero-btn solid trigger-workspace" type="button">Launch App →</button>
           </nav>
@@ -126,10 +124,10 @@
           <div class="av-hero-screen">
             <main class="av-hero-main">
               <!-- Eyebrow Pill -->
-              <a class="av-hero-pill trigger-studio" href="#studio" aria-label="Autonomous Intelligence Mesh">
+              <div class="av-hero-pill" aria-label="Autonomous Intelligence Mesh">
                 <span class="av-hero-sparkle">✦</span>
                 <span class="av-hero-pill-label">Autonomous Intelligence Mesh • Distributed Multi-Agent Platform</span>
-              </a>
+              </div>
 
               <!-- Headline -->
               <h1>
@@ -166,8 +164,7 @@
 
               <!-- Action Row -->
               <div class="av-hero-cta">
-                <button class="av-hero-btn solid trigger-studio" type="button">Enter Swarm Studio</button>
-                <button class="av-hero-btn ghost trigger-workspace" type="button">Open Workspace Console</button>
+                <button class="av-hero-btn solid trigger-workspace" type="button">Open Workspace Console</button>
               </div>
             </main>
           </div>
@@ -254,69 +251,8 @@
             </div>
           </div>
         </section>
-
-        <!-- FOOTER BAR -->
-        <footer class="av-home-footer">
-          <span>AgentVerse Distributed Multi-Agent Intelligence System</span>
-          <span>FastAPI + Uvicorn • 4-PC Offline LAN Mesh</span>
-        </footer>
       </div>
 
-      <!-- Interactive Swarm Command Studio Drawer -->
-      <aside class="av-modal" id="av-modal" data-open="false" aria-label="AgentVerse Swarm Command Studio">
-        <div class="av-window">
-          <div class="av-bar">
-            <div class="av-identity">
-              <span class="av-hero-pulse-dot"></span>
-              <span>AGENTVERSE // AUTONOMOUS SWARM RUNTIME</span>
-            </div>
-            <div class="av-actions">
-              <button type="button" class="av-btn" id="modal-workspace-btn" style="background: rgba(95,242,194,0.15); border-color: rgba(95,242,194,0.3); color: #5ff2c2;">Open Full App UI</button>
-              <button type="button" class="av-btn" id="modal-pulse-btn">Emit Neural Pulse</button>
-              <button type="button" class="av-btn" id="modal-close-btn">Return to Horizon (Esc)</button>
-            </div>
-          </div>
-
-          <div class="av-grid">
-            <div class="av-graph-pane">
-              <svg class="av-graph-svg" id="topology-svg" viewBox="0 0 700 560" preserveAspectRatio="xMidYMid meet"></svg>
-              <div class="av-graph-overlay">
-                <span>● ACTIVE ORCHESTRATION GRAPH (<span id="node-count-display">4</span> NODES)</span>
-                <span id="synapse-latency-display">SYNAPSE LATENCY: 12ms</span>
-              </div>
-            </div>
-
-            <div class="av-chat-pane">
-              <div class="av-chips">
-                <button type="button" class="av-chip" data-query="Write a python function for quicksort algorithm">Quicksort Python</button>
-                <button type="button" class="av-chip" data-query="Research the latest advancements in quantum computing">Quantum Research</button>
-                <button type="button" class="av-chip" data-query="websearch the latest AI news today">Websearch AI News</button>
-                <button type="button" class="av-chip" data-query="Calculate 4529 * 382">Calculator Tool</button>
-              </div>
-
-              <div class="av-stream" id="chat-stream" aria-live="polite"></div>
-
-              <form class="av-input-bar" id="chat-form" autocomplete="off">
-                <span class="av-hero-pulse-dot"></span>
-                <label for="prompt-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);">Message Agent Swarm</label>
-                <input
-                  type="text"
-                  id="prompt-input"
-                  class="av-input"
-                  placeholder="Message AgentVerse swarm (e.g. Write a python script, research AI)..."
-                  required
-                >
-                <button type="submit" class="av-send" id="av-send-btn">
-                  <span>Send</span>
-                  <svg viewBox="0 0 9.5 8" fill="none" aria-hidden="true" style="width: 10px; height: 10px;">
-                    <path d="M0.7 4H8.8M5.6 0.75 8.85 4 5.6 7.25" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <!-- Persistent Floating Return-To-Home Button (available when inside the underlying workspace) -->
@@ -345,18 +281,10 @@
   const enterBtn = document.getElementById('enter-btn');
   const bgVideo = document.getElementById('bg-video');
   const canvas = document.getElementById('stars-canvas');
-  const modal = document.getElementById('av-modal');
-  const closeBtn = document.getElementById('modal-close-btn');
-  const pulseBtn = document.getElementById('modal-pulse-btn');
-  const chatForm = document.getElementById('chat-form');
-  const promptInput = document.getElementById('prompt-input');
-  const chatStream = document.getElementById('chat-stream');
-  const topologySvg = document.getElementById('topology-svg');
   const heroBar = document.querySelector('.av-hero-bar');
   const menuBtn = document.getElementById('menu-btn');
   const brandHome = document.getElementById('brand-home');
   const returnHeroBtn = document.getElementById('return-hero-btn');
-  const modalWorkspaceBtn = document.getElementById('modal-workspace-btn');
 
   // 1. Starfield Particle Background for Splash
   const ctx = canvas ? canvas.getContext('2d') : null;
@@ -538,7 +466,6 @@
   }
 
   function switchToWorkspace(role = 'employee', view = 'chat') {
-    modal.dataset.open = 'false';
     mainFrame.classList.add('hidden-hero');
     if (returnHeroBtn) returnHeroBtn.style.display = 'none';
 
@@ -577,10 +504,6 @@
       switchToWorkspace(role, view);
     });
   });
-
-  if (modalWorkspaceBtn) {
-    modalWorkspaceBtn.addEventListener('click', () => switchToWorkspace('employee', 'chat'));
-  }
 
   // Smooth scroll links within the home page
   document.querySelectorAll('.nav-scroll-link').forEach((link) => {
@@ -635,246 +558,21 @@
     if (!heroBar.contains(e.target)) setMenu(false);
   });
 
-  // 6. Interactive Swarm Topology with Real Node Data
-  let nodes = [
-    { id: 'controller', label: 'CONTROLLER', role: 'Laptop A (8501)', x: 350, y: 260, color: '#ffffff' },
-    { id: 'brain',      label: 'BRAIN',      role: 'Laptop B (8001)', x: 180, y: 150, color: '#9b8cff' },
-    { id: 'research',   label: 'RESEARCH',   role: 'Laptop C (8002)', x: 520, y: 150, color: '#5ff2c2' },
-    { id: 'coding',     label: 'CODING',     role: 'Laptop D (8003)', x: 180, y: 390, color: '#70b5ff' },
-    { id: 'tools',      label: 'TOOLS-HUB',  role: 'Web & Calc',      x: 520, y: 390, color: '#f6a6ff' }
-  ];
-
-  const links = [
-    ['controller', 'brain'], ['controller', 'research'], ['controller', 'coding'], ['controller', 'tools'],
-    ['brain', 'research'], ['brain', 'coding'], ['research', 'tools'], ['coding', 'tools']
-  ];
-
-  // Fetch actual cluster status to dynamically highlight active nodes
+  // Dynamic cluster status in navbar badge
   async function fetchClusterInfo() {
     try {
       const res = await fetch('/api/v1/cluster');
       if (res.ok) {
         const data = await res.json();
         const topBadge = document.getElementById('top-nodes-count');
-        const countDisplay = document.getElementById('node-count-display');
         const count = data.connected_count || (data.nodes ? data.nodes.length : 3);
         if (topBadge) topBadge.textContent = `${count} Nodes Active`;
-        if (countDisplay) countDisplay.textContent = count;
       }
     } catch (e) {
       // Offline fallback
     }
   }
   fetchClusterInfo();
-
-  function renderTopology() {
-    topologySvg.innerHTML = '';
-    links.forEach((pair, i) => {
-      const a = nodes.find((n) => n.id === pair[0]);
-      const b = nodes.find((n) => n.id === pair[1]);
-      if (!a || !b) return;
-
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', a.x);
-      line.setAttribute('y1', a.y);
-      line.setAttribute('x2', b.x);
-      line.setAttribute('y2', b.y);
-      line.setAttribute('stroke', 'rgba(255,255,255,0.12)');
-      line.setAttribute('stroke-width', '1.2');
-      topologySvg.appendChild(line);
-
-      const packet = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      packet.setAttribute('r', '3');
-      packet.setAttribute('fill', b.color);
-
-      const animX = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-      animX.setAttribute('attributeName', 'cx');
-      animX.setAttribute('values', a.x + ';' + b.x + ';' + a.x);
-      animX.setAttribute('dur', (2.4 + (i % 3) * 0.7) + 's');
-      animX.setAttribute('repeatCount', 'indefinite');
-
-      const animY = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-      animY.setAttribute('attributeName', 'cy');
-      animY.setAttribute('values', a.y + ';' + b.y + ';' + a.y);
-      animY.setAttribute('dur', (2.4 + (i % 3) * 0.7) + 's');
-      animY.setAttribute('repeatCount', 'indefinite');
-
-      packet.appendChild(animX);
-      packet.appendChild(animY);
-      topologySvg.appendChild(packet);
-    });
-
-    nodes.forEach((n) => {
-      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', n.x);
-      circle.setAttribute('cy', n.y);
-      circle.setAttribute('r', '24');
-      circle.setAttribute('fill', 'rgba(15,16,24,0.92)');
-      circle.setAttribute('stroke', n.color);
-      circle.setAttribute('stroke-width', '1.5');
-      g.appendChild(circle);
-
-      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      txt.setAttribute('x', n.x);
-      txt.setAttribute('y', n.y + 38);
-      txt.setAttribute('text-anchor', 'middle');
-      txt.setAttribute('fill', '#ffffff');
-      txt.setAttribute('font-size', '10.5');
-      txt.setAttribute('font-weight', '600');
-      txt.textContent = n.label;
-      g.appendChild(txt);
-
-      const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      sub.setAttribute('x', n.x);
-      sub.setAttribute('y', n.y + 51);
-      sub.setAttribute('text-anchor', 'middle');
-      sub.setAttribute('fill', 'rgba(255,255,255,0.45)');
-      sub.setAttribute('font-size', '9');
-      sub.textContent = n.role;
-      g.appendChild(sub);
-
-      topologySvg.appendChild(g);
-    });
-  }
-
-  function appendStream(role, bg, color, text) {
-    const msg = document.createElement('div');
-    msg.className = 'av-msg';
-    const head = document.createElement('div');
-    head.className = 'av-msg-head';
-
-    const badge = document.createElement('span');
-    badge.className = 'av-badge';
-    badge.style.background = bg;
-    badge.style.color = color;
-    badge.textContent = role;
-
-    const time = document.createElement('span');
-    time.className = 'av-time';
-    time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-    head.appendChild(badge);
-    head.appendChild(time);
-
-    const body = document.createElement('div');
-    body.className = 'av-body';
-    body.style.whiteSpace = 'pre-wrap';
-    body.textContent = text;
-
-    msg.appendChild(head);
-    msg.appendChild(body);
-    chatStream.appendChild(msg);
-    chatStream.scrollTop = chatStream.scrollHeight;
-    return msg;
-  }
-
-  // Handle prompt execution using REAL backend endpoint /api/v1/query
-  async function handlePrompt(query) {
-    appendStream('USER', 'rgba(255,255,255,0.15)', '#ffffff', query);
-    
-    const pendingMsg = appendStream(
-      'ROUTER',
-      'rgba(95,242,194,0.18)',
-      '#5ff2c2',
-      'Routing query through multi-agent mesh...'
-    );
-
-    const t0 = performance.now();
-
-    try {
-      const response = await fetch('/api/v1/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query, mode: 'Auto' })
-      });
-
-      const elapsed = Math.round(performance.now() - t0);
-      const latencyDisplay = document.getElementById('synapse-latency-display');
-      if (latencyDisplay) latencyDisplay.textContent = `SYNAPSE LATENCY: ${elapsed}ms`;
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (pendingMsg && pendingMsg.parentNode) {
-          pendingMsg.parentNode.removeChild(pendingMsg);
-        }
-
-        const agentName = (data.target_agent || data.node || 'AGENT').toUpperCase();
-        const answer = data.final_synthesized_answer || (data.response && data.response.answer) || data.answer || JSON.stringify(data, null, 2);
-
-        appendStream(
-          agentName,
-          'rgba(155,140,255,0.20)',
-          '#b8adff',
-          answer
-        );
-
-        if (data.execution_path && data.execution_path.length > 0) {
-          const pathSteps = data.execution_path.map(p => `${p.agent || p.step || 'Node'} (${p.status || 'OK'})`).join(' → ');
-          appendStream(
-            'TRACE-HUD',
-            'rgba(95,242,194,0.12)',
-            '#5ff2c2',
-            `Execution Corridor: ${pathSteps}`
-          );
-        }
-      } else {
-        throw new Error(`Server returned HTTP ${response.status}`);
-      }
-    } catch (err) {
-      if (pendingMsg && pendingMsg.parentNode) {
-        pendingMsg.parentNode.removeChild(pendingMsg);
-      }
-      appendStream(
-        'CLUSTER-GATEWAY',
-        'rgba(246,166,255,0.20)',
-        '#f6a6ff',
-        `Autonomous loop executed in simulation mode: [Cluster Router assigned task to Agent Node]. Response received.`
-      );
-    }
-  }
-
-  function openModal(open) {
-    modal.dataset.open = open ? 'true' : 'false';
-    if (open) {
-      setTimeout(() => { promptInput.focus(); }, 150);
-    }
-  }
-
-  document.querySelectorAll('.trigger-studio').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      openModal(true);
-    });
-  });
-
-  closeBtn.addEventListener('click', () => { openModal(false); });
-  pulseBtn.addEventListener('click', () => {
-    appendStream('PULSE-EMITTER', 'rgba(112,181,255,0.20)', '#70b5ff', 'Manual synchronization pulse propagated to all cluster nodes.');
-  });
-
-  chatForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const val = promptInput.value.trim();
-    if (!val) return;
-    promptInput.value = '';
-    handlePrompt(val);
-  });
-
-  document.querySelectorAll('.av-chip').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const query = btn.getAttribute('data-query');
-      if (query) handlePrompt(query);
-    });
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.dataset.open === 'true') {
-      openModal(false);
-    }
-  });
 
   // Auto-advance underlying React app from 'home' to 'chat' workspace so that landing page is never shown
   function ensureReactWorkspaceActive() {
@@ -889,9 +587,8 @@
     const target = e.target.closest('button, a');
     if (!target) return;
 
-    // Ignore clicks inside the cinematic hero frame itself or modal
+    // Ignore clicks inside the cinematic hero frame itself
     if (mainFrame && mainFrame.contains(target)) return;
-    if (modal && modal.contains(target)) return;
     if (splashStage && splashStage.contains(target)) return;
 
     const title = (target.getAttribute('title') || '').toLowerCase();
@@ -984,8 +681,6 @@
   });
 
   // Start initialization
-  renderTopology();
-  appendStream('SYSTEM', 'rgba(255,255,255,0.12)', '#ffffff', 'AgentVerse Autonomous Swarm Runtime online. Connected to distributed 4-node cluster.');
   startSplashSequence();
   setTimeout(ensureReactWorkspaceActive, 200);
   setTimeout(ensureReactWorkspaceActive, 600);
