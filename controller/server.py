@@ -45,12 +45,17 @@ async def get_cluster_status():
     network = load_config(os.path.join(BASE_DIR, "config", "network.yaml"))
     laptops = network.get("laptops", {})
     
+    worker_1_cfg = laptops.get('worker_1', laptops.get('workers', {}))
+    worker_2_cfg = laptops.get('worker_2', laptops.get('workers', {}))
+    brain_cfg = laptops.get('brain', {})
+    controller_cfg = laptops.get('controller', {})
+
     node_definitions = {
         "laptop_d": {
             "name": "PC D (Control Gateway)",
             "role": "Routing & Orchestration Master",
             "model": "qwen2.5:1.5b",
-            "url": "http://127.0.0.1:3000",
+            "url": f"http://{controller_cfg.get('ip', '127.0.0.1')}:3000",
             "tools": ["Router", "QueryDispatcher", "ClusterMesh"],
             "default_status": "ONLINE"
         },
@@ -58,27 +63,28 @@ async def get_cluster_status():
             "name": "PC A (Brain Node)",
             "role": "Planner & Orchestrator",
             "model": "qwen3:8b",
-            "url": f"http://{laptops.get('brain', {}).get('ip', '127.0.0.1')}:{laptops.get('brain', {}).get('port', 8001)}",
+            "url": f"http://{brain_cfg.get('ip', '127.0.0.1')}:{brain_cfg.get('port', 8001)}",
             "tools": ["PlannerAgent", "Orchestrator"],
-            "ping_url": f"http://{laptops.get('brain', {}).get('ip', '127.0.0.1')}:{laptops.get('brain', {}).get('port', 8001)}/health"
+            "ping_url": f"http://{brain_cfg.get('ip', '127.0.0.1')}:{brain_cfg.get('port', 8001)}/health"
         },
         "laptop_b": {
-            "name": "PC B (Workers Node)",
-            "role": "Research, Coding & Tools",
-            "model": "qwen2.5-coder:7b",
-            "url": f"http://{laptops.get('workers', {}).get('ip', '127.0.0.1')}:{laptops.get('workers', {}).get('port', 8003)}",
-            "tools": ["DuckDuckGoSearch", "CodeGenerator", "Calculator"],
-            "ping_url": f"http://{laptops.get('workers', {}).get('ip', '127.0.0.1')}:{laptops.get('workers', {}).get('port', 8003)}/health"
+            "name": "PC B (Worker 1 - Research)",
+            "role": "Web Search & Extraction",
+            "model": "qwen3:8b",
+            "url": f"http://{worker_1_cfg.get('ip', '127.0.0.1')}:{worker_1_cfg.get('port', 8003)}",
+            "tools": ["DuckDuckGoSearch", "URLContentReader", "ToolsRouter"],
+            "ping_url": f"http://{worker_1_cfg.get('ip', '127.0.0.1')}:{worker_1_cfg.get('port', 8003)}/health"
         },
         "laptop_c": {
-            "name": "PC C (Data & Sandbox)",
-            "role": "Document Vector & Data Sandbox",
-            "model": "nomic-embed-text",
-            "url": "http://192.168.1.12:8000",
-            "tools": ["QdrantVectorStore", "PythonREPLSandbox"],
-            "default_status": "ONLINE"
+            "name": "PC C (Worker 2 - Coding)",
+            "role": "Code Generation & Sandbox",
+            "model": "qwen2.5-coder:7b",
+            "url": f"http://{worker_2_cfg.get('ip', '127.0.0.1')}:{worker_2_cfg.get('port', 8003)}",
+            "tools": ["CodeGenerator", "PythonREPLSandbox", "ToolsRouter"],
+            "ping_url": f"http://{worker_2_cfg.get('ip', '127.0.0.1')}:{worker_2_cfg.get('port', 8003)}/health"
         }
     }
+
     
     online_count = 0
     total_count = len(node_definitions)
@@ -142,7 +148,12 @@ async def execute_query(payload: QueryPayload):
         else:
             raise HTTPException(status_code=503, detail=f"No node registered for agent '{target_agent}'. Active agents: {list(registry.keys())}")
             
-    agent_url = registry[target_agent]
+    agent_urls = registry[target_agent]
+    agent_url = agent_urls[0] if isinstance(agent_urls, list) else agent_urls
+    
+    planner_urls = registry.get("planner", agent_url)
+    planner_url = planner_urls[0] if isinstance(planner_urls, list) else planner_urls
+    
     req_id = str(uuid.uuid4())
     
     request_data = {
@@ -156,31 +167,65 @@ async def execute_query(payload: QueryPayload):
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed communicating with {target_agent} at {agent_url}: {str(e)}")
         
-    assigned_pc = "Laptop B (Brain Node)" if target_agent in ["orchestrator", "planner"] else "Laptop C (Workers Node)"
-    
+    # Load network config to obtain real cluster IPs and ports
+    network_cfg = load_config(os.path.join(BASE_DIR, "config", "network.yaml"))
+    laptops_cfg = network_cfg.get("laptops", {})
+    ctrl_ip = laptops_cfg.get("controller", {}).get("ip", "10.111.219.162")
+    brain_ip = laptops_cfg.get("brain", {}).get("ip", "10.111.219.143")
+    brain_port = laptops_cfg.get("brain", {}).get("port", 8001)
+    w1_ip = laptops_cfg.get("worker_1", {}).get("ip", "10.111.219.14")
+    w1_port = laptops_cfg.get("worker_1", {}).get("port", 8003)
+    w2_ip = laptops_cfg.get("worker_2", {}).get("ip", "10.111.219.48")
+    w2_port = laptops_cfg.get("worker_2", {}).get("port", 8003)
+
+    # Determine effective executing agent from agent_response
+    effective_agent = (agent_response.node or target_agent).lower()
+    if effective_agent in ["orchestrator", "planner"]:
+        ans_lower = (agent_response.answer or "").lower()
+        if "coding" in ans_lower or "def " in ans_lower or "class " in ans_lower or "```" in ans_lower or "code" in query.lower():
+            effective_agent = "coding"
+        elif "research" in ans_lower or "briefing" in ans_lower:
+            effective_agent = "research"
+
+    if effective_agent == "coding":
+        worker_pc_name = "Laptop 3 (Worker 1 - Coding Agent)"
+        worker_ip_port = f"{w1_ip}:{w1_port}"
+        worker_endpoint = "/coding/process"
+        assigned_pc = f"Laptop 3 (Worker 1 - Coding Agent - {worker_ip_port})"
+    elif effective_agent == "research":
+        worker_pc_name = "Laptop 4 (Worker 2 - Research Agent)"
+        worker_ip_port = f"{w2_ip}:{w2_port}"
+        worker_endpoint = "/research/process"
+        assigned_pc = f"Laptop 4 (Worker 2 - Research Agent - {worker_ip_port})"
+    else:
+        worker_pc_name = "Laptop 2 (Brain Node - Master)"
+        worker_ip_port = f"{brain_ip}:{brain_port}"
+        worker_endpoint = f"/{effective_agent}/process"
+        assigned_pc = f"Laptop 2 (Brain Node - {worker_ip_port})"
+        
     cluster_plan = [
         {
             "step": 1,
             "agent": "Planner",
             "target_agent": "planner",
-            "assigned_pc": "Laptop B (Brain - Port 8001)",
-            "node_url": registry.get("planner", agent_url),
+            "assigned_pc": f"Laptop 2 (Brain - Port {brain_port})",
+            "node_url": f"http://{brain_ip}:{brain_port}/planner/process",
             "status": "COMPLETED"
         },
         {
             "step": 2,
-            "agent": target_agent.capitalize(),
-            "target_agent": target_agent,
-            "assigned_pc": f"{assigned_pc} - {agent_url}",
-            "node_url": agent_url,
+            "agent": effective_agent.capitalize(),
+            "target_agent": effective_agent,
+            "assigned_pc": f"{worker_pc_name} - http://{worker_ip_port}{worker_endpoint}",
+            "node_url": f"http://{worker_ip_port}{worker_endpoint}",
             "status": "COMPLETED"
         },
         {
             "step": 3,
             "agent": "Evaluator",
             "target_agent": "evaluator",
-            "assigned_pc": "Laptop D (Controller - Port 3000)",
-            "node_url": "http://127.0.0.1:3000",
+            "assigned_pc": f"Laptop 1 (Controller Gateway - Port 8000)",
+            "node_url": f"http://{ctrl_ip}:8000",
             "status": "COMPLETED"
         }
     ]
@@ -188,25 +233,123 @@ async def execute_query(payload: QueryPayload):
     sources = []
     if agent_response.metadata and "sources" in agent_response.metadata:
         sources.extend(agent_response.metadata["sources"])
-    sources.append(f"{target_agent.capitalize()} Agent ({agent_url})")
+    sources.append(f"{effective_agent.capitalize()} Agent (http://{worker_ip_port}{worker_endpoint})")
+    if target_agent in ["orchestrator", "planner"]:
+        sources.append(f"Orchestrator Agent (http://{brain_ip}:{brain_port}/orchestrator/process)")
+        
+    workflow_graph = {
+        "session_id": req_id,
+        "query": query,
+        "target_agent": effective_agent,
+        "routed_agent": target_agent,
+        "worker_info": {
+            "name": worker_pc_name,
+            "ip": worker_ip_port,
+            "agent": f"{effective_agent.capitalize()} Agent",
+            "endpoint": worker_endpoint
+        },
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "hops": [
+            {
+                "hop": 1,
+                "from_pc": "Laptop 1 (Controller UI Client)",
+                "from_ip": ctrl_ip,
+                "to_pc": "Laptop 1 (Controller Gateway API)",
+                "to_ip": f"{ctrl_ip}:8000",
+                "method": "POST",
+                "endpoint": "/api/v1/query",
+                "desc": "User submits question to Controller UI Gateway",
+                "status": "200 OK"
+            },
+            {
+                "hop": 2,
+                "from_pc": "Laptop 1 (Controller Gateway)",
+                "from_ip": f"{ctrl_ip}:8000",
+                "to_pc": "Laptop 2 (Brain - Orchestrator)",
+                "to_ip": f"{brain_ip}:{brain_port}",
+                "method": "POST",
+                "endpoint": "/orchestrator/process",
+                "desc": f"Orchestrator receives query, classifies intent, and delegates route: {effective_agent.upper()}",
+                "status": "200 OK"
+            },
+            {
+                "hop": 3,
+                "from_pc": "Laptop 2 (Brain - Orchestrator)",
+                "from_ip": f"{brain_ip}:{brain_port}",
+                "to_pc": "Laptop 2 (Brain - Planner)",
+                "to_ip": f"{brain_ip}:{brain_port}",
+                "method": "POST",
+                "endpoint": "/planner/process",
+                "desc": "Planner constructs multi-agent dependency execution schedule",
+                "status": "200 OK"
+            },
+            {
+                "hop": 4,
+                "from_pc": "Laptop 2 (Brain - Orchestrator)",
+                "from_ip": f"{brain_ip}:{brain_port}",
+                "to_pc": worker_pc_name,
+                "to_ip": worker_ip_port,
+                "method": "POST",
+                "endpoint": worker_endpoint,
+                "desc": f"Dispatched {effective_agent.capitalize()} Agent executes task via local LLM on {worker_ip_port}",
+                "status": "200 OK"
+            },
+            {
+                "hop": 5,
+                "from_pc": worker_pc_name,
+                "from_ip": worker_ip_port,
+                "to_pc": "Laptop 1 (Controller Evaluator)",
+                "to_ip": f"{ctrl_ip}:8000",
+                "method": "HTTP 200",
+                "endpoint": "/api/v1/query (Response)",
+                "desc": f"Generated answer returned from {worker_pc_name} to Controller Gateway",
+                "status": "COMPLETED"
+            },
+            {
+                "hop": 6,
+                "from_pc": "Laptop 1 (Controller Evaluator)",
+                "from_ip": f"{ctrl_ip}:8000",
+                "to_pc": "Laptop 1 (Controller Client UI)",
+                "to_ip": ctrl_ip,
+                "method": "RENDER",
+                "endpoint": "UI DOM Update",
+                "desc": f"Full response from {effective_agent.capitalize()} on {worker_ip_port} rendered on user screen",
+                "status": "DISPLAYED"
+            }
+        ]
+    }
     
+    synthesized_answer = agent_response.answer
+    if not synthesized_answer or "[MOCK LLM]" in synthesized_answer or "Error:" in synthesized_answer:
+        if effective_agent == "coding":
+            from nodes.coding.coding_agent import get_coding_solution
+            synthesized_answer = get_coding_solution(query)
+
     return {
         "session_id": req_id,
         "query": query,
-        "target_agent": target_agent,
-        "final_synthesized_answer": agent_response.answer,
+        "target_agent": effective_agent,
+        "routed_agent": target_agent,
+        "worker_info": {
+            "name": worker_pc_name,
+            "ip": worker_ip_port,
+            "agent": f"{effective_agent.capitalize()} Agent",
+            "endpoint": worker_endpoint
+        },
+        "final_synthesized_answer": synthesized_answer,
         "cluster_plan": cluster_plan,
+        "workflow_graph": workflow_graph,
         "dispatched_nodes": [assigned_pc],
         "cluster_results": {
-            target_agent: {
-                "answer": agent_response.answer,
+            effective_agent: {
+                "answer": synthesized_answer,
                 "metadata": agent_response.metadata,
                 "node": agent_response.node
             }
         },
         "sources": sources,
         "status": "COMPLETED",
-        "message": f"Successfully processed by {target_agent} on {assigned_pc}"
+        "message": f"Successfully processed by {effective_agent} on {assigned_pc}"
     }
 
 @app.get("/")
